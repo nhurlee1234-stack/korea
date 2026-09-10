@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>한국어 공부 · Солонгос хэлний хяналт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --celadon: #E7EDE6;
+    --paper: #FBF9F4;
+    --ink: #22282A;
+    --ink-soft: #545E58;
+    --indigo: #33455C;
+    --indigo-deep: #212D3D;
+    --red: #B23A2E;
+    --red-soft: #E7DAD3;
+    --gold: #B08D57;
+    --line: #D9DED4;
+    --green: #4A6B4D;
+    --green-soft: #DCE6DC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--celadon);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{
+    max-width:680px;
+    margin:0 auto;
+    padding:24px 18px 80px;
+  }
+  header.top{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:16px;
+  }
+  .title-block h1{
+    font-family:'Noto Serif KR',serif;
+    font-weight:700;
+    font-size:24px;
+    margin:0 0 2px;
+    color:var(--indigo-deep);
+  }
+  .title-block p{margin:0; font-size:12.5px; color:var(--ink-soft);}
+  .streak-badge{text-align:right; font-family:'Noto Serif KR',serif;}
+  .streak-badge .num{font-size:26px; font-weight:700; color:var(--red); line-height:1;}
+  .streak-badge .lab{font-size:10.5px; color:var(--ink-soft); font-family:'Inter',sans-serif;}
+
+  nav.tabs{
+    display:flex; gap:4px; margin-bottom:20px;
+    background:var(--paper); border:1px solid var(--line); border-radius:10px;
+    padding:4px; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  }
+  nav.tabs button{
+    flex:0 0 auto; padding:9px 13px; border:none; background:transparent;
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:500; color:var(--ink-soft);
+    border-radius:7px; cursor:pointer; white-space:nowrap;
+  }
+  nav.tabs button.active{background:var(--indigo-deep); color:var(--paper); font-weight:600;}
+  nav.tabs button.hidden-tab{display:none;}
+
+  section.panel{display:none;}
+  section.panel.active{display:block;}
+  .card{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:18px; margin-bottom:14px;}
+  .card h2{font-family:'Noto Serif KR',serif; font-size:16px; margin:0 0 12px; color:var(--indigo-deep); font-weight:600;}
+  .muted{color:var(--ink-soft); font-size:13px;}
+  .small{font-size:11.5px;}
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:10px 16px; border-radius:8px; border:none; font-family:'Inter',sans-serif; font-size:13.5px; font-weight:600; cursor:pointer;}
+  .btn:hover{opacity:0.88;}
+  .btn-primary{background:var(--indigo-deep); color:var(--paper);}
+  .btn-done{background:var(--red); color:var(--paper);}
+  .btn-ghost{background:transparent; color:var(--indigo-deep); border:1px solid var(--line);}
+  .btn-sm{padding:6px 11px; font-size:12px;}
+  .btn:disabled{opacity:0.45; cursor:default;}
+
+  input[type=text], input[type=date], input[type=url], select, textarea{
+    width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:7px;
+    font-family:'Inter',sans-serif; font-size:13.5px; background:#fff; color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:50px;}
+  label.field{display:block; font-size:12px; color:var(--ink-soft); margin:10px 0 4px;}
+  .row{display:flex; gap:10px;}
+  .row > div{flex:1;}
+
+  /* Daily tasks */
+  .task-row{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line);}
+  .task-row:last-child{border-bottom:none;}
+  .task-row input[type=checkbox]{width:19px; height:19px; accent-color:var(--red); flex:0 0 auto;}
+  .task-icon{font-size:18px; width:24px; text-align:center;}
+  .task-label{flex:1; font-size:14px;}
+  .task-min{font-size:11.5px; color:var(--ink-soft);}
+  .task-row.done .task-label{color:var(--ink-soft); text-decoration:line-through;}
+  .goal-banner{
+    text-align:center; padding:12px; border-radius:9px; background:var(--green-soft); color:var(--green);
+    font-weight:600; font-size:13.5px; margin-top:12px;
+  }
+
+  /* Flashcards */
+  .flash-stage{
+    text-align:center; padding:32px 10px; background:var(--indigo-deep); border-radius:12px; color:var(--paper);
+    cursor:grab; user-select:none; min-height:110px; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; margin-bottom:14px; touch-action:none; position:relative; will-change:transform;
+  }
+  .flash-stage.dragging{cursor:grabbing;}
+  .flash-stage .swipe-tag{
+    position:absolute; top:16px; width:14px; height:14px; border-radius:100%; opacity:0;
+  }
+  .swipe-tag.know{right:16px; background:var(--green);}
+  .swipe-tag.forgot{left:16px; background:var(--red);}
+  .mode-pill{
+    position:absolute; top:12px; left:50%; transform:translateX(-50%);
+    font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px;
+    background:rgba(255,255,255,0.12); color:var(--celadon); letter-spacing:0.02em;
+  }
+  .speaker-btn{
+    background:rgba(255,255,255,0.12); border:none; color:var(--paper);
+    width:34px; height:34px; border-radius:100%; font-size:15px; cursor:pointer; margin-top:10px;
+  }
+  .speaker-btn:hover{background:rgba(255,255,255,0.22);}
+  .kr.cloze-mode{font-size:19px; font-weight:500; font-family:'Inter',sans-serif; line-height:1.5; font-style:italic;}
+  .pill.leech{background:#F3D9B1; color:#8A5A20;}
+  .flash-stage .kr{font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700;}
+  .flash-stage .mn{font-family:'Inter',sans-serif; font-size:15px; margin-top:10px; color:var(--celadon);}
+  .flash-stage .ex{font-size:12px; margin-top:8px; color:#B9C4D3; font-style:italic;}
+  .flash-stage .extr{font-size:11.5px; margin-top:3px; color:#8695A8;}
+  .flash-stage .hint{font-size:11px; color:#8695A8; margin-top:14px;}
+  .flash-actions{display:flex; gap:10px;}
+  .flash-actions .btn{flex:1;}
+
+  /* Fullscreen review overlay */
+  .review-overlay{
+    position:fixed; inset:0; background:var(--indigo-deep); z-index:999;
+    display:none; flex-direction:column; padding:20px;
+  }
+  .review-overlay.open{display:flex;}
+  .review-top{
+    display:flex; justify-content:space-between; align-items:center;
+    color:var(--celadon); font-family:'Noto Serif KR',serif; font-size:14px; font-weight:600;
+    flex:0 0 auto;
+  }
+  .review-close{
+    background:transparent; border:1px solid rgba(255,255,255,0.25); color:var(--paper);
+    width:34px; height:34px; border-radius:100%; font-size:16px; cursor:pointer;
+  }
+  .review-body{
+    flex:1; display:flex; flex-direction:column; justify-content:center;
+    max-width:480px; margin:0 auto; width:100%;
+  }
+  .review-body .flash-stage{
+    min-height:280px; margin-bottom:22px; padding:40px 20px;
+  }
+  .review-body .flash-stage .kr{font-size:38px;}
+  .review-body .flash-stage .mn{font-size:19px;}
+
+  /* Vocab stats + filters */
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px;}
+  .stat-mini{background:var(--paper); border:1px solid var(--line); border-radius:9px; padding:10px 6px; text-align:center;}
+  .stat-mini .n{font-family:'Noto Serif KR',serif; font-size:18px; font-weight:700; color:var(--indigo-deep);}
+  .stat-mini .l{font-size:10px; color:var(--ink-soft); margin-top:1px;}
+  .filter-row{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;}
+  .filter-row button{
+    padding:6px 12px; border-radius:100px; border:1px solid var(--line); background:#fff;
+    font-size:12px; font-weight:500; color:var(--ink-soft); cursor:pointer;
+  }
+  .filter-row button.active{background:var(--indigo-deep); color:var(--paper); border-color:var(--indigo-deep);}
+
+  .word-list{margin-top:6px;}
+  .word-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+  .word-row:last-child{border-bottom:none;}
+  .word-kr{font-family:'Noto Serif KR',serif; font-weight:600; font-size:15px;}
+  .word-mn{font-size:12.5px; color:var(--ink-soft);}
+  .pill{font-size:10.5px; padding:2px 8px; border-radius:100px; background:var(--red-soft); color:var(--red); font-weight:600; white-space:nowrap;}
+  .pill.mastered{background:var(--green-soft); color:var(--green);}
+  .pill.new{background:#E4E7EE; color:var(--indigo);}
+  .del-btn{
+    background:transparent; border:none; color:var(--ink-soft); font-size:18px; line-height:1;
+    width:24px; height:24px; cursor:pointer; border-radius:6px; flex:0 0 auto;
+  }
+  .del-btn:hover{background:var(--red-soft); color:var(--red);}
+  .note-item{border-bottom:1px solid var(--line); padding:10px 0;}
+  .note-item:last-child{border-bottom:none;}
+  .note-item .word-row{border-bottom:none; padding:0;}
+  .note-feedback{
+    margin-top:8px; padding:10px 12px; background:var(--celadon); border-radius:8px;
+    font-size:12.5px; line-height:1.5; white-space:pre-wrap; color:var(--ink);
+  }
+
+  /* Schedule */
+  table.sched{width:100%; border-collapse:collapse;}
+  table.sched td{padding:9px 4px; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:middle;}
+  table.sched td.day{font-weight:600; width:64px; color:var(--indigo-deep);}
+  table.sched input[type=text]{padding:6px 8px; font-size:12.5px;}
+  .countdown{margin-top:14px; padding-top:14px; border-top:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;}
+  .countdown .n{font-family:'Noto Serif KR',serif; font-size:22px; font-weight:700; color:var(--red);}
+  .goal-toggle{display:flex; gap:8px; margin-top:6px;}
+  .goal-toggle button{flex:1; padding:8px; border-radius:7px; border:1px solid var(--line); background:#fff; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer;}
+  .goal-toggle button.active{background:var(--indigo-deep); color:var(--paper); border-color:var(--indigo-deep);}
+
+  /* Roadmap */
+  .month-card{border:1px solid var(--line); border-radius:11px; padding:14px; margin-bottom:10px; background:var(--paper);}
+  .month-card.current{border-color:var(--red); background:#FFF9F7;}
+  .month-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .month-tag{font-size:11px; font-weight:700; color:var(--indigo); font-family:'Noto Serif KR',serif;}
+  .month-title{font-size:14.5px; font-weight:600; margin:2px 0;}
+  .month-desc{font-size:12.5px; color:var(--ink-soft); margin-bottom:8px;}
+  .bar-track{height:7px; background:var(--line); border-radius:100px; overflow:hidden;}
+  .bar-fill{height:100%; background:var(--red); border-radius:100px;}
+  .bar-pct{font-size:11px; color:var(--ink-soft); margin-top:4px; text-align:right;}
+  .phase-divider{font-size:12px; font-weight:700; color:var(--ink-soft); margin:16px 0 8px; letter-spacing:0.02em;}
+
+  /* Korea mode */
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(78px,1fr)); gap:8px; margin-bottom:16px;}
+  .cat-btn{border:1px solid var(--line); background:#fff; border-radius:10px; padding:10px 4px; text-align:center; cursor:pointer;}
+  .cat-btn.active{border-color:var(--indigo-deep); background:var(--indigo-deep); color:var(--paper);}
+  .cat-btn .ic{font-size:20px; display:block;}
+  .cat-btn .lb{font-size:10.5px; margin-top:4px; display:block;}
+
+  /* Progress */
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;}
+  .stat-box{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center;}
+  .stat-box .n{font-family:'Noto Serif KR',serif; font-size:22px; font-weight:700; color:var(--indigo-deep);}
+  .stat-box .l{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .heat{display:grid; grid-template-columns:repeat(14, 1fr); gap:4px; margin-top:6px;}
+  .heat .cell{aspect-ratio:1; border-radius:3px; background:var(--line);}
+  .heat .cell.on{background:var(--red);}
+  .heat .cell.noted{background:var(--gold);}
+  .empty{text-align:center; padding:26px 10px; color:var(--ink-soft); font-size:13.5px;}
+  .overall-bar{margin-bottom:14px;}
+
+  /* Settings */
+  .status-line{display:flex; align-items:center; gap:8px; margin-top:10px; font-size:12.5px;}
+  .dot{width:8px; height:8px; border-radius:100%; background:var(--line);}
+  .dot.ok{background:var(--green);}
+  .dot.err{background:var(--red);}
+  .steps-note{font-size:12px; color:var(--ink-soft); margin-top:8px; line-height:1.5;}
+  #panel-more details{cursor:default;}
+  #panel-more summary{cursor:pointer; list-style:none; display:flex; align-items:center; justify-content:space-between;}
+  #panel-more summary::-webkit-details-marker{display:none;}
+  #panel-more summary::after{content:'+'; font-size:18px; color:var(--ink-soft); font-weight:400;}
+  #panel-more details[open] summary::after{content:'–';}
+  #panel-more details{margin-bottom:12px;}
+  ::placeholder{color:#9AA39B;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="top">
+    <div class="title-block">
+      <h1>한국어 공부</h1>
+      <p id="todayDate">Солонгос хэлний хяналт</p>
+    </div>
+    <div class="streak-badge">
+      <div class="num" id="streakNum">0</div>
+      <div class="lab">өдрийн дараалал</div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="vocab">Үгийн сан</button>
+    <button class="tab-btn" data-tab="progress">Явц</button>
+    <button class="tab-btn" data-tab="more">Бусад</button>
+  </nav>
+
+  <!-- VOCAB -->
+  <section class="panel active" id="panel-vocab">
+    <div class="stat-strip" id="vocabStats"></div>
+
+    <div class="card" id="reviewPromptCard">
+      <h2>Давталт</h2>
+      <div class="muted" id="dueSummaryText">Ачаалж байна…</div>
+      <button class="btn btn-primary" id="startReviewBtn" style="margin-top:12px;">Давталт эхлүүлэх →</button>
+    </div>
+
+    <div class="card">
+      <h2>Шинэ үг нэмэх</h2>
+      <label class="field">Солонгос үг</label>
+      <input type="text" id="inKr" placeholder="예: 시작하다">
+      <label class="field">Монгол утга</label>
+      <input type="text" id="inMn" placeholder="эхлэх">
+      <label class="field">Жишээ өгүүлбэр (хоосон орхивол AI зохионо)</label>
+      <textarea id="inEx" placeholder="오늘부터 시작해요."></textarea>
+      <label class="field">Жишээний орчуулга (заавал биш)</label>
+      <input type="text" id="inExTr" placeholder="Өнөөдрөөс эхэлнэ.">
+      <button class="btn btn-primary" style="margin-top:12px;" id="addWordBtn">Нэмэх</button>
+    </div>
+
+    <div class="card">
+      <h2>Бүх үг (<span id="wordTotal">0</span>)</h2>
+      <div class="filter-row" id="vocabFilters">
+        <button data-f="all" class="active">ALL</button>
+        <button data-f="new">NEW</button>
+        <button data-f="review">REVIEW</button>
+        <button data-f="mastered">MASTERED</button>
+        <button data-f="leech">ХҮНД</button>
+      </div>
+      <div class="word-list" id="wordList"></div>
+    </div>
+  </section>
+
+  <!-- FULLSCREEN REVIEW OVERLAY -->
+  <div class="review-overlay" id="reviewOverlay">
+    <div class="review-top">
+      <span id="dueCount">0</span>
+      <button class="review-close" id="closeReviewBtn">✕</button>
+    </div>
+    <div class="review-body">
+      <div class="flash-stage" id="flashStage">
+        <div class="swipe-tag forgot" id="tagForgot"></div>
+        <div class="swipe-tag know" id="tagKnow"></div>
+        <div class="mode-pill" id="modePill">Таних</div>
+        <div class="kr" id="flashKr">단어</div>
+        <button class="speaker-btn" id="speakerBtn" style="display:none;" title="Сонсох">Сонсох</button>
+        <div class="mn" id="flashMn" style="display:none;"></div>
+        <div class="ex" id="flashEx" style="display:none;"></div>
+        <div class="extr" id="flashExTr" style="display:none;"></div>
+        <div class="hint" id="flashHint" style="display:none;"></div>
+      </div>
+      <div class="flash-actions" id="flashActions" style="display:none;">
+        <button class="btn btn-ghost" id="btnForgot">Мартсан</button>
+        <button class="btn btn-primary" id="btnKnew">Санасан</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <section class="panel" id="panel-progress">
+    <div class="stat-grid" id="progressGrid"></div>
+    <div class="card">
+      <h2>Сүүлийн 70 хоног</h2>
+      <div class="heat" id="heatGrid"></div>
+    </div>
+  </section>
+
+  <!-- MORE (everything else, tucked away) -->
+  <section class="panel" id="panel-more">
+
+    <details class="card" id="taskDetails">
+      <summary><h2 style="display:inline;">Өнөөдрийн даалгавар</h2></summary>
+      <div class="muted" id="todayTimeLabel" style="margin-top:10px;">18:00–20:00 · Ажлын өдрийн хуваарь</div>
+      <div id="taskList" style="margin-top:10px;"></div>
+      <div class="goal-banner" id="goalBanner" style="display:none;">Daily goal completed</div>
+    </details>
+
+    <details class="card" open>
+      <summary><h2 style="display:inline;">Хичээлийн тэмдэглэл</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Хичээлдээ юу үзсэнээ товчхон тэмдэглэж ав.</p>
+      <textarea id="lessonNoteInput" placeholder="Жишээ: өнөөдөр -는데 дүрэм, ресторанд захиалга өгөх өгүүлбэрүүд үзлээ."></textarea>
+      <button class="btn btn-primary btn-sm" id="addLessonNoteBtn" style="margin-top:10px;">Нэмэх</button>
+      <div id="lessonNoteList" style="margin-top:14px;"></div>
+    </details>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">7 хоногийн хуваарь &amp; TOPIK</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Ажлын өдөр 60–90 мин, амралтын өдөр 2–3 цаг. Өөрчилж болно.</p>
+      <table class="sched" id="schedTable"></table>
+      <label class="field">Зорилтот түвшин</label>
+      <div class="goal-toggle">
+        <button data-goal="I" id="goalI">TOPIK I</button>
+        <button data-goal="II" id="goalII">TOPIK II</button>
+      </div>
+      <div class="countdown">
+        <div>
+          <label class="field" style="margin-top:0;">Шалгалтын огноо</label>
+          <input type="date" id="topikDate">
+        </div>
+        <div style="text-align:right;"><div class="n" id="topikDays">D-–</div></div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">12 сарын аялал</h2></summary>
+      <div class="overall-bar" style="margin-top:10px;">
+        <div class="bar-track"><div class="bar-fill" id="overallBarFill" style="width:0%;"></div></div>
+        <div class="bar-pct" id="overallBarPct">Ерөнхий явц: 0%</div>
+      </div>
+      <div class="muted small" id="roadmapHint">Эхлэх огноогоо доор "Тохиргоо"-нд оруулбал сар бүрийн явц автоматаар тооцогдоно.</div>
+      <div id="roadmapList" style="margin-top:10px;"></div>
+    </details>
+
+    <details class="card" id="koreaDetails" style="display:none;">
+      <summary><h2 style="display:inline;">🇰🇷 Korea Mode</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Бодит амьдралын нөхцөл тус бүрт хэрэглэдэг үг, өгүүлбэрээ хадгал.</p>
+      <div class="cat-grid" id="catGrid"></div>
+      <div id="catWordList"></div>
+      <label class="field">Солонгос хэллэг</label>
+      <input type="text" id="koreaKr" placeholder="예: 아메리카노 한 잔 주세요">
+      <label class="field">Монгол утга</label>
+      <input type="text" id="koreaMn" placeholder="Нэг америкaно өгөөч">
+      <button class="btn btn-primary" style="margin-top:12px;" id="addKoreaBtn">Нэмэх</button>
+    </details>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">Тохиргоо</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Apps Script Web App URL-ээ оруулбал үгийн сан автоматаар Google Sheets рүү хадгалагдана. Хоосон орхивол сайт зөвхөн энэ хөтчид локалаар хадгална.</p>
+      <label class="field" style="margin-top:0;">Apps Script Web App URL</label>
+      <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
+      <button class="btn btn-primary btn-sm" id="saveUrlBtn" style="margin-top:10px;">Хадгалж холбох</button>
+      <div class="status-line"><div class="dot" id="syncDot"></div><span id="syncStatus">Тохируулаагүй — локал горимд ажиллаж байна</span></div>
+      <label class="field">Хөтөлбөрийн эхлэх огноо</label>
+      <input type="date" id="startDate">
+      <label class="field">Нэг session-д хэдэн үг шалгах</label>
+      <input type="text" id="sessionSizeInput" placeholder="20">
+    </details>
+
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'korean-study-data';
+  const DAY_NAMES_MN = ['Ням','Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба'];
+  const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+  const INTERVALS = [0,7,14,21,28,35,42];
+
+  const DAILY_TASKS_DEF = [
+    {key:'grammar', icon:'📖', label:'Grammar', minutes:20},
+    {key:'vocab', icon:'🧠', label:'Vocabulary — 15 үг', minutes:10},
+    {key:'listening', icon:'🎧', label:'Listening', minutes:15},
+    {key:'speaking', icon:'🗣', label:'Speaking', minutes:10},
+    {key:'writing', icon:'✍️', label:'Writing', minutes:10},
+  ];
+
+  const ROADMAP = [
+    {month:1, phase:'mn', title:'한글 + Дуудлага', desc:'Хангыл цагаа болон дуудлагын үндэс'},
+    {month:2, phase:'mn', title:'Үндсэн дүрэм', desc:'Өгүүлбэрийн үндсэн бүтэц'},
+    {month:3, phase:'mn', title:'Одоо / Өнгөрсөн / Ирээдүй', desc:'Цаг үеийн дүрэм'},
+    {month:4, phase:'mn', title:'Өдөр тутмын яриа', desc:'Практик харилцан яриа'},
+    {month:5, phase:'mn', title:'Listening + Speaking', desc:'Сонсох, ярих чадвар'},
+    {month:6, phase:'mn', title:'TOPIK I бэлтгэл', desc:'Эхний шалгалтын бэлтгэл'},
+    {month:7, phase:'kr', title:'Survival Korean', desc:'Солонгост амьдрах анхан шатны хэл'},
+    {month:8, phase:'kr', title:'Өдөр тутмын яриа', desc:'Бодит орчинд харилцах'},
+    {month:9, phase:'kr', title:'Ажил / Сургуулийн хэл', desc:'Мэргэжлийн орчны хэл'},
+    {month:10, phase:'kr', title:'Дунд шатны дүрэм', desc:'Илүү нарийн дүрэм, найруулга'},
+    {month:11, phase:'kr', title:'TOPIK бэлтгэл', desc:'Шалгалтын эцсийн бэлтгэл'},
+    {month:12, phase:'kr', title:'TOPIK + бодит амьдрал', desc:'Шалгалт өгөх, бодит хэрэглээ'},
+  ];
+
+  const KOREA_CATEGORIES = [
+    {key:'cafe', icon:'☕', label:'Café'},
+    {key:'shopping', icon:'🛒', label:'Shopping'},
+    {key:'subway', icon:'🚇', label:'Subway'},
+    {key:'pharmacy', icon:'💊', label:'Pharmacy'},
+    {key:'hospital', icon:'🏥', label:'Hospital'},
+    {key:'housing', icon:'🏠', label:'Housing'},
+    {key:'work', icon:'💼', label:'Work'},
+    {key:'intro', icon:'👋', label:'Introduction'},
+    {key:'restaurant', icon:'🍜', label:'Restaurant'},
+    {key:'phone', icon:'📞', label:'Phone call'},
+  ];
+
+  const defaultData = {
+    vocab: [],
+    streakLog: [],
+    dailyTasks: {},
+    schedule: {
+      mon:{time:'60–90 мин'}, tue:{time:'60–90 мин'}, wed:{time:'60–90 мин'},
+      thu:{time:'60–90 мин'}, fri:{time:'60–90 мин'},
+      sat:{time:'2–3 цаг'}, sun:{time:'2–3 цаг'}
+    },
+    topikDate: '',
+    topikGoal: 'I',
+    startDate: '',
+    appsScriptUrl: '',
+    sessionSize: 20,
+    lessonNotes: []
+  };
+
+  let data = null;
+  let reviewQueue = [];
+  let currentCard = null;
+  let vocabFilter = 'all';
+  let activeKoreaCat = KOREA_CATEGORIES[0].key;
+
+  function todayStr(d){
+    d = d || new Date();
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Local cache (window.storage) ----------
+  async function loadLocal(){
+    try{
+      const res = await window.storage.get(STORAGE_KEY, false);
+      return res && res.value ? JSON.parse(res.value) : null;
+    }catch(e){ return null; }
+  }
+  async function saveLocal(){
+    try{ await window.storage.set(STORAGE_KEY, JSON.stringify(data), false); }
+    catch(e){ console.error('local save failed', e); }
+  }
+
+  // ---------- Google Sheets sync ----------
+  function setSyncStatus(state, msg){
+    const dot = document.getElementById('syncDot');
+    const txt = document.getElementById('syncStatus');
+    dot.className = 'dot' + (state ? ' '+state : '');
+    txt.textContent = msg;
+  }
+
+  async function apiGet(){
+    if(!data.appsScriptUrl) return null;
+    try{
+      const res = await fetch(data.appsScriptUrl, {method:'GET'});
+      const json = await res.json();
+      return json;
+    }catch(e){ return null; }
+  }
+  async function apiPost(payload){
+    if(!data.appsScriptUrl) return null;
+    try{
+      const res = await fetch(data.appsScriptUrl, {
+        method:'POST',
+        headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }catch(e){ return null; }
+  }
+
+  async function syncFromSheets(){
+    if(!data.appsScriptUrl){
+      setSyncStatus('', 'Тохируулаагүй — локал горимд ажиллаж байна');
+      return;
+    }
+    setSyncStatus('', 'Холбогдож байна…');
+    const res = await apiGet();
+    if(res && res.success && Array.isArray(res.vocab)){
+      data.vocab = res.vocab.map(r=>({
+        id: String(r['ID']!==undefined ? r['ID'] : (r.id||'')),
+        kr: r['Korean word'] || r.kr || '',
+        mn: r['Монгол утга'] || r.mn || '',
+        ex: r['Example sentence'] || r.ex || '',
+        exTranslation: r['Example translation'] || r.exTranslation || '',
+        level: Number(r['Level'] !== undefined ? r['Level'] : (r.level||0)) || 0,
+        nextReview: r['Next review date'] || r.nextReview || todayStr(),
+        created: r['Created date'] || r.created || todayStr(),
+        category: r['Category'] || r.category || 'general'
+      }));
+      setSyncStatus('ok', 'Google Sheets-тэй холбогдсон · ' + data.vocab.length + ' үг');
+      saveLocal();
+      render();
+      refreshVocabTab();
+    } else {
+      setSyncStatus('err', 'Холбогдож чадсангүй — локал хуулбар ашиглаж байна');
+    }
+  }
+
+  // ---------- Init ----------
+  async function init(){
+    const cached = await loadLocal();
+    data = cached ? Object.assign(JSON.parse(JSON.stringify(defaultData)), cached) : JSON.parse(JSON.stringify(defaultData));
+    if(!data.vocab) data.vocab = [];
+    if(!data.vocab.length){
+      const today = todayStr();
+      data.vocab = [
+        {id:'demo-1', kr:'안녕하세요', mn:'Сайн байна уу', ex:'안녕하세요, 만나서 반가워요.', exTranslation:'Сайн байна уу, танилцсандаа баяртай байна.', level:0, nextReview:today, created:today, category:'general'},
+        {id:'demo-2', kr:'감사합니다', mn:'Баярлалаа', ex:'도와주셔서 감사합니다.', exTranslation:'Тусалсанд баярлалаа.', level:0, nextReview:today, created:today, category:'general'},
+        {id:'demo-3', kr:'시작하다', mn:'Эхлэх', ex:'오늘부터 시작해요.', exTranslation:'Өнөөдрөөс эхэлнэ.', level:0, nextReview:today, created:today, category:'general'},
+      ];
+      saveLocal();
+    }
+    if(!data.streakLog) data.streakLog = [];
+    if(!data.dailyTasks) data.dailyTasks = {};
+    if(!data.schedule) data.schedule = defaultData.schedule;
+    if(!data.lessonNotes) data.lessonNotes = [];
+    if(!data.topikGoal) data.topikGoal = 'I';
+
+    document.getElementById('appsScriptUrl').value = data.appsScriptUrl || '';
+    document.getElementById('startDate').value = data.startDate || '';
+    document.getElementById('sessionSizeInput').value = data.sessionSize || 20;
+
+    render();
+    refreshVocabTab();
+    if(data.appsScriptUrl) syncFromSheets();
+    else setSyncStatus('', 'Тохируулаагүй — локал горимд ажиллаж байна');
+  }
+
+  document.getElementById('saveUrlBtn').addEventListener('click', ()=>{
+    data.appsScriptUrl = document.getElementById('appsScriptUrl').value.trim();
+    saveLocal();
+    syncFromSheets();
+  });
+  document.getElementById('startDate').addEventListener('change', (e)=>{
+    data.startDate = e.target.value;
+    saveLocal();
+    render();
+  });
+  document.getElementById('sessionSizeInput').addEventListener('change', (e)=>{
+    const n = parseInt(e.target.value, 10);
+    data.sessionSize = (n && n > 0) ? n : 20;
+    e.target.value = data.sessionSize;
+    saveLocal();
+    refreshVocabTab();
+  });
+
+  // ---------- Tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+      if(btn.dataset.tab==='vocab') refreshVocabTab();
+      if(btn.dataset.tab==='more') renderKoreaMode();
+    });
+  });
+  // ---------- Daily tasks & streak ----------
+  function getTodayTasks(){
+    const t = todayStr();
+    if(!data.dailyTasks[t]) data.dailyTasks[t] = {};
+    return data.dailyTasks[t];
+  }
+  function isDayComplete(tasksObj){
+    return DAILY_TASKS_DEF.every(td => tasksObj[td.key]);
+  }
+  function renderTaskList(){
+    const t = todayStr();
+    const tasks = getTodayTasks();
+    const list = document.getElementById('taskList');
+    list.innerHTML = DAILY_TASKS_DEF.map(td=>{
+      const done = !!tasks[td.key];
+      return `<div class="task-row ${done?'done':''}">
+        <input type="checkbox" data-key="${td.key}" ${done?'checked':''}>
+        <div class="task-icon">${td.icon}</div>
+        <div class="task-label">${td.label}</div>
+        <div class="task-min">${td.minutes} мин</div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
+      chk.addEventListener('change', ()=>{
+        const tasks = getTodayTasks();
+        tasks[chk.dataset.key] = chk.checked;
+        const complete = isDayComplete(tasks);
+        if(complete && !data.streakLog.includes(t)) data.streakLog.push(t);
+        if(!complete) data.streakLog = data.streakLog.filter(d=>d!==t);
+        saveLocal();
+        render();
+      });
+    });
+    document.getElementById('goalBanner').style.display = isDayComplete(tasks) ? 'block' : 'none';
+  }
+
+  // ---------- Lesson notes ----------
+  function renderLessonNotes(){
+    const box = document.getElementById('lessonNoteList');
+    if(!data.lessonNotes.length){
+      box.innerHTML = '<div class="empty">Тэмдэглэл алга.</div>';
+      return;
+    }
+    box.innerHTML = [...data.lessonNotes].reverse().map(n=>`
+      <div class="note-item">
+        <div class="word-row" style="align-items:flex-start;">
+          <div>
+            <div class="small muted" style="margin-bottom:3px;">${escapeHtml(n.date)}</div>
+            <div style="font-size:13.5px; white-space:pre-wrap;">${escapeHtml(n.text)}</div>
+          </div>
+          <button class="del-btn" data-id="${n.id}" title="Устгах">×</button>
+        </div>
+        ${n.feedback
+          ? `<div class="note-feedback">${escapeHtml(n.feedback)}</div>`
+          : `<button class="btn btn-ghost btn-sm feedback-btn" data-id="${n.id}" style="margin-top:6px;">Дүгнэлт авах</button>`
+        }
+      </div>
+    `).join('');
+    box.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(!confirm('Энэ тэмдэглэлийг устгах уу?')) return;
+        data.lessonNotes = data.lessonNotes.filter(n=>n.id!==btn.dataset.id);
+        saveLocal();
+        renderLessonNotes();
+        renderProgress();
+      });
+    });
+    box.querySelectorAll('.feedback-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>getNoteFeedback(btn.dataset.id));
+    });
+  }
+
+  async function getNoteFeedback(noteId){
+    const note = data.lessonNotes.find(n=>n.id===noteId);
+    if(!note) return;
+    const btn = document.querySelector(`.feedback-btn[data-id="${noteId}"]`);
+    if(btn){ btn.disabled = true; btn.textContent = 'Шалгаж байна…'; }
+    try{
+      const prompt = 'Чи бол Солонгос хэл сурч буй хүнд туслах хэлний багш. Доорхи бол миний өнөөдрийн хичээлийн тэмдэглэл.\n'
+        + '1) Юу үзснийг 1-2 өгүүлбэрээр товч дүгнэ.\n'
+        + '2) Хэрэв тэмдэглэлд Солонгос үг/өгүүлбэр байвал зөв эсэхийг шалгаад, алдаа байвал зассан хувилбарыг тайлбарын хамт өг.\n'
+        + '3) Дараа нь юу дадлагажуулбал зохимжтойг нэг богино зөвлөгөөгөөр өг.\n'
+        + 'Монгол хэлээр, товчоор бич.\n\nТэмдэглэл:\n' + note.text;
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-6',
+          max_tokens:1000,
+          messages:[{role:'user', content:prompt}]
+        })
+      });
+      const json = await res.json();
+      const textBlocks = (json.content||[]).filter(b=>b.type==='text').map(b=>b.text);
+      note.feedback = textBlocks.join('\n').trim() || 'Хариу авч чадсангүй, дахин оролдоно уу.';
+    } catch(e){
+      note.feedback = 'Алдаа гарлаа — интернэт холболтоо шалгаад дахин оролдоно уу.';
+    }
+    saveLocal();
+    renderLessonNotes();
+  }
+  document.getElementById('addLessonNoteBtn').addEventListener('click', ()=>{
+    const ta = document.getElementById('lessonNoteInput');
+    const text = ta.value.trim();
+    if(!text) return;
+    data.lessonNotes.push({id:'note-'+Date.now()+Math.random().toString(36).slice(2,6), date:todayStr(), text});
+    ta.value = '';
+    saveLocal();
+    renderLessonNotes();
+    renderProgress();
+  });
+
+  function computeStreak(){
+    const set = new Set(data.streakLog);
+    let streak = 0;
+    let cursor = new Date();
+    if(!set.has(todayStr(cursor))) cursor.setDate(cursor.getDate()-1);
+    while(set.has(todayStr(cursor))){ streak++; cursor.setDate(cursor.getDate()-1); }
+    let longest = 0, run = 0, prev = null;
+    [...data.streakLog].sort().forEach(ds=>{
+      if(prev){
+        const diff = Math.round((new Date(ds)-new Date(prev))/86400000);
+        run = diff===1 ? run+1 : 1;
+      } else run = 1;
+      longest = Math.max(longest, run);
+      prev = ds;
+    });
+    return {streak, longest};
+  }
+
+  // ---------- Vocab / SRS ----------
+  async function generateExample(kr, mn){
+    const prompt = 'Чи Солонгос хэлний багш. "' + kr + '" (утга: ' + mn + ') гэдэг үгийг ашигласан, анхан шатны сурагчид тохирох 1 энгийн жишээ өгүүлбэр Солонгосоор зохиогоод, монгол орчуулгыг нь өг. Зөвхөн дараах JSON форматаар хариул, өөр юу ч бичихгүй: {"sentence":"...","translation":"..."}';
+    try{
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model:'claude-sonnet-4-6',
+          max_tokens:300,
+          messages:[{role:'user', content:prompt}]
+        })
+      });
+      const json = await res.json();
+      const text = (json.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').replace(/```json|```/g,'').trim();
+      const parsed = JSON.parse(text);
+      if(parsed && parsed.sentence) return {sentence:parsed.sentence, translation:parsed.translation||''};
+    } catch(e){ /* fall through */ }
+    return null;
+  }
+
+  async function addWord(){
+    const kr = document.getElementById('inKr').value.trim();
+    const mn = document.getElementById('inMn').value.trim();
+    let ex = document.getElementById('inEx').value.trim();
+    let exTranslation = document.getElementById('inExTr').value.trim();
+    if(!kr || !mn) return;
+
+    const addBtn = document.getElementById('addWordBtn');
+    let autoGenerated = false;
+    if(!ex){
+      addBtn.disabled = true;
+      addBtn.textContent = 'Жишээ зохиож байна…';
+      const generated = await generateExample(kr, mn);
+      if(generated){ ex = generated.sentence; exTranslation = generated.translation; autoGenerated = true; }
+      addBtn.disabled = false;
+      addBtn.textContent = 'Нэмэх';
+    }
+
+    const localId = 'local-'+Date.now()+Math.random().toString(36).slice(2,6);
+    const today = todayStr();
+    const word = {id: localId, kr, mn, ex, exTranslation, level:0, nextReview: today, created: today, category:'general', autoEx: autoGenerated};
+    data.vocab.push(word);
+    document.getElementById('inKr').value='';
+    document.getElementById('inMn').value='';
+    document.getElementById('inEx').value='';
+    document.getElementById('inExTr').value='';
+    saveLocal(); refreshVocabTab(); render();
+
+    const res = await apiPost({action:'add', kr, mn, ex, exTranslation, category:'general'});
+    if(res && res.success){
+      word.id = String(res.id);
+      word.created = res.created || today;
+      saveLocal(); refreshVocabTab();
+    }
+  }
+  document.getElementById('addWordBtn').addEventListener('click', addWord);
+
+  function dueWords(cat){
+    const t = todayStr();
+    return data.vocab.filter(w => (cat ? w.category===cat : w.category==='general') && w.nextReview <= t);
+  }
+
+  function refreshVocabTab(){
+    renderVocabStats();
+    const due = dueWords('general');
+    const cap = data.sessionSize || 20;
+    document.getElementById('dueSummaryText').textContent = due.length
+      ? due.length + ' үг өнөөдөр давтах хугацаатай' + (due.length > cap ? ` — session бүрт ${cap}-аар хийнэ.` : '.')
+      : 'Өнөөдөр давтах үг алга — шинэ үг нэмж болно.';
+    document.getElementById('startReviewBtn').disabled = !due.length;
+    reviewQueue = [...due].sort((a,b)=> a.nextReview.localeCompare(b.nextReview)).slice(0, cap);
+    renderWordList();
+  }
+
+  function openReview(){
+    if(!reviewQueue.length) return;
+    document.getElementById('reviewOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('dueCount').textContent = reviewQueue.length;
+    nextCard();
+  }
+  function closeReview(){
+    document.getElementById('reviewOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    refreshVocabTab();
+  }
+  document.getElementById('startReviewBtn').addEventListener('click', openReview);
+  document.getElementById('closeReviewBtn').addEventListener('click', closeReview);
+
+  function renderVocabStats(){
+    const gw = data.vocab.filter(w=>w.category==='general');
+    const t = todayStr();
+    const total = gw.length;
+    const due = gw.filter(w=>w.nextReview<=t).length;
+    const fresh = gw.filter(w=>w.level===0).length;
+    const mastered = gw.filter(w=>w.level>=INTERVALS.length-1).length;
+    document.getElementById('vocabStats').innerHTML = `
+      <div class="stat-mini"><div class="n">${total}</div><div class="l">Нийт</div></div>
+      <div class="stat-mini"><div class="n">${due}</div><div class="l">Өнөөдөр давтах</div></div>
+      <div class="stat-mini"><div class="n">${fresh}</div><div class="l">Шинэ</div></div>
+      <div class="stat-mini"><div class="n">${mastered}</div><div class="l">Эзэмшсэн</div></div>`;
+  }
+
+  document.querySelectorAll('#vocabFilters button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#vocabFilters button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      vocabFilter = btn.dataset.f;
+      renderWordList();
+    });
+  });
+
+  let currentMode = 'recog';
+  const MODE_LABELS = {recog:'Таних', prod:'Гаргах', cloze:'Нөхөх'};
+
+  function pickMode(w){
+    const hasEx = w.ex && w.ex.includes(w.kr);
+    if(w.level < 2) return 'recog';
+    const r = Math.random();
+    if(hasEx){
+      if(r < 0.4) return 'recog';
+      if(r < 0.7) return 'prod';
+      return 'cloze';
+    }
+    return r < 0.55 ? 'recog' : 'prod';
+  }
+
+  function nextCard(){
+    if(window.__resetFlashTransform) window.__resetFlashTransform(false);
+    document.getElementById('modePill').style.display = 'none';
+    document.getElementById('speakerBtn').style.display = 'none';
+    document.getElementById('flashKr').classList.remove('cloze-mode');
+    if(!reviewQueue.length){
+      document.getElementById('flashKr').textContent = '완료!';
+      document.getElementById('flashMn').style.display='none';
+      document.getElementById('flashEx').style.display='none';
+      document.getElementById('flashExTr').style.display='none';
+      document.getElementById('flashHint').textContent = 'Өнөөдрийн бүх үгээ давтлаа!';
+      document.getElementById('flashHint').style.display='block';
+      document.getElementById('flashActions').style.display='none';
+      currentCard = null;
+      return;
+    }
+    currentCard = reviewQueue[0];
+    currentMode = pickMode(currentCard);
+    document.getElementById('modePill').textContent = MODE_LABELS[currentMode];
+    document.getElementById('modePill').style.display = 'block';
+
+    const frontEl = document.getElementById('flashKr');
+    const speakerBtn = document.getElementById('speakerBtn');
+    document.getElementById('flashMn').style.display = 'none';
+    document.getElementById('flashEx').style.display = 'none';
+    document.getElementById('flashExTr').style.display = 'none';
+
+    if(currentMode === 'recog'){
+      frontEl.textContent = currentCard.kr;
+      speakerBtn.style.display = 'inline-flex';
+      speakerBtn.dataset.speak = currentCard.kr;
+      document.getElementById('flashMn').textContent = currentCard.mn;
+      document.getElementById('flashEx').textContent = currentCard.ex || '';
+      document.getElementById('flashExTr').textContent = currentCard.exTranslation || '';
+    } else if(currentMode === 'prod'){
+      frontEl.textContent = currentCard.mn;
+      speakerBtn.style.display = 'none';
+      document.getElementById('flashMn').textContent = currentCard.kr;
+      document.getElementById('flashEx').textContent = currentCard.ex || '';
+      document.getElementById('flashExTr').textContent = currentCard.exTranslation || '';
+    } else { // cloze
+      frontEl.classList.add('cloze-mode');
+      const blanked = currentCard.ex.split(currentCard.kr).join('▁▁▁▁');
+      frontEl.textContent = blanked;
+      speakerBtn.style.display = 'none';
+      document.getElementById('flashMn').textContent = currentCard.ex;
+      document.getElementById('flashEx').textContent = currentCard.kr + ' — ' + currentCard.mn;
+      document.getElementById('flashExTr').textContent = currentCard.exTranslation || '';
+    }
+
+    document.getElementById('flashHint').textContent = '';
+    document.getElementById('flashHint').style.display = 'none';
+    document.getElementById('flashActions').style.display = 'none';
+  }
+  function revealCard(){
+    document.getElementById('flashMn').style.display='block';
+    if(document.getElementById('flashEx').textContent) document.getElementById('flashEx').style.display='block';
+    if(document.getElementById('flashExTr').textContent) document.getElementById('flashExTr').style.display='block';
+    document.getElementById('flashHint').style.display='none';
+    document.getElementById('flashActions').style.display='flex';
+    if(currentMode !== 'recog' && currentCard){
+      const speakerBtn = document.getElementById('speakerBtn');
+      speakerBtn.style.display = 'inline-flex';
+      speakerBtn.dataset.speak = currentCard.kr;
+    }
+  }
+  document.getElementById('speakerBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const text = e.currentTarget.dataset.speak;
+    if(!text || !('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+
+  // ---------- Swipe gestures ----------
+  (function initSwipe(){
+    const stage = document.getElementById('flashStage');
+    const tagKnow = document.getElementById('tagKnow');
+    const tagForgot = document.getElementById('tagForgot');
+    let startX = null, startY = null, dragging = false, moved = false, pid = null;
+
+    function setTransform(dx, dy){
+      const upY = Math.min(dy, 0);
+      stage.style.transform = `translate(${dx}px, ${upY}px) rotate(${dx/18}deg)`;
+      const t = Math.min(Math.abs(dx)/80, 1);
+      tagKnow.style.opacity = dx > 0 ? t : 0;
+      tagForgot.style.opacity = dx < 0 ? t : 0;
+    }
+    function resetTransform(animate){
+      stage.style.transition = animate ? 'transform 0.2s ease' : 'none';
+      stage.style.transform = 'translate(0,0) rotate(0)';
+      tagKnow.style.opacity = 0;
+      tagForgot.style.opacity = 0;
+    }
+
+    stage.addEventListener('pointerdown', e=>{
+      if(!currentCard) return;
+      if(e.target.closest('#speakerBtn')) return;
+      startX = e.clientX; startY = e.clientY; dragging = true; moved = false; pid = e.pointerId;
+      stage.setPointerCapture(pid);
+      stage.classList.add('dragging');
+      stage.style.transition = 'none';
+    });
+    stage.addEventListener('pointermove', e=>{
+      if(!dragging || startX===null) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if(Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+      setTransform(dx, dy);
+    });
+    function endDrag(e){
+      if(!dragging) return;
+      dragging = false;
+      stage.classList.remove('dragging');
+      const dx = startX===null ? 0 : (e.clientX - startX);
+      const dy = startY===null ? 0 : (e.clientY - startY);
+      startX = null; startY = null;
+      if(!currentCard || !moved){ resetTransform(true); return; }
+
+      if(dy < -50 && Math.abs(dy) > Math.abs(dx)){
+        resetTransform(true);
+        revealCard();
+        return;
+      }
+      if(dx > 80 && Math.abs(dx) >= Math.abs(dy)){
+        stage.style.transition = 'transform 0.25s ease';
+        stage.style.transform = `translate(700px, ${Math.min(dy,0)}px) rotate(22deg)`;
+        setTimeout(()=>gradeCard(true), 160);
+      } else if(dx < -80 && Math.abs(dx) >= Math.abs(dy)){
+        stage.style.transition = 'transform 0.25s ease';
+        stage.style.transform = `translate(-700px, ${Math.min(dy,0)}px) rotate(-22deg)`;
+        setTimeout(()=>gradeCard(false), 160);
+      } else {
+        resetTransform(true);
+      }
+    }
+    stage.addEventListener('pointerup', endDrag);
+    stage.addEventListener('pointercancel', endDrag);
+    window.__resetFlashTransform = resetTransform;
+  })();
+
+  async function gradeCard(knew){
+    if(!currentCard) return;
+    const w = data.vocab.find(v=>v.id===currentCard.id);
+    if(w){
+      if(knew){ w.forgotStreak = 0; } else { w.forgotStreak = (w.forgotStreak||0) + 1; }
+      w.level = knew ? Math.min(w.level+1, INTERVALS.length-1) : Math.max(w.level-1, 0);
+      const d = new Date(); d.setDate(d.getDate()+INTERVALS[w.level]);
+      w.nextReview = todayStr(d);
+      apiPost({action:'update', id:w.id, level:w.level, nextReview:w.nextReview});
+    }
+    reviewQueue.shift();
+    if(!knew && w) reviewQueue.push(w);
+    saveLocal();
+    nextCard();
+    document.getElementById('dueCount').textContent = reviewQueue.length;
+    renderVocabStats();
+    renderWordList();
+  }
+  document.getElementById('btnKnew').addEventListener('click', ()=>gradeCard(true));
+  document.getElementById('btnForgot').addEventListener('click', ()=>gradeCard(false));
+
+  function renderWordList(){
+    const gw = data.vocab.filter(w=>w.category==='general');
+    document.getElementById('wordTotal').textContent = gw.length;
+    const t = todayStr();
+    let filtered = gw;
+    if(vocabFilter==='new') filtered = gw.filter(w=>w.level===0);
+    if(vocabFilter==='review') filtered = gw.filter(w=>w.nextReview<=t);
+    if(vocabFilter==='mastered') filtered = gw.filter(w=>w.level>=INTERVALS.length-1);
+    if(vocabFilter==='leech') filtered = gw.filter(w=>(w.forgotStreak||0)>=3);
+
+    const list = document.getElementById('wordList');
+    if(!filtered.length){
+      list.innerHTML = '<div class="empty">Энэ ангилалд үг алга.</div>';
+      return;
+    }
+    list.innerHTML = [...filtered].reverse().map(w=>{
+      const mastered = w.level >= INTERVALS.length-1;
+      const isNew = w.level===0;
+      const due = w.nextReview <= t;
+      const isLeech = (w.forgotStreak||0) >= 3;
+      let pillClass = isLeech ? 'leech' : (due ? '' : (mastered?'mastered':'new'));
+      let pillText = isLeech ? 'Хүнд' : (mastered ? 'Эзэмшсэн' : (due ? 'Давтах' : (isNew?'Шинэ':w.nextReview)));
+      return `<div class="word-row">
+        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="pill ${pillClass}">${pillText}</div>
+          <button class="del-btn" data-id="${w.id}" title="Устгах">×</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>deleteWord(btn.dataset.id));
+    });
+  }
+
+  async function deleteWord(id){
+    const w = data.vocab.find(v=>v.id===id);
+    if(!w) return;
+    if(!confirm(`"${w.kr}" гэдэг үгийг устгах уу?`)) return;
+    data.vocab = data.vocab.filter(v=>v.id!==id);
+    saveLocal();
+    refreshVocabTab();
+    renderKoreaWordList();
+    apiPost({action:'delete', id});
+  }
+
+  // ---------- Schedule ----------
+  function renderSchedule(){
+    const tbl = document.getElementById('schedTable');
+    const order = ['mon','tue','wed','thu','fri','sat','sun'];
+    tbl.innerHTML = order.map(k=>{
+      const idx = DAY_KEYS.indexOf(k);
+      const s = data.schedule[k];
+      return `<tr><td class="day">${DAY_NAMES_MN[idx]}</td>
+        <td><input type="text" data-day="${k}" class="schedTimeInput" value="${escapeHtml(s.time)}"></td></tr>`;
+    }).join('');
+    tbl.querySelectorAll('.schedTimeInput').forEach(inp=>{
+      inp.addEventListener('change', ()=>{ data.schedule[inp.dataset.day].time = inp.value; saveLocal(); });
+    });
+
+    document.getElementById('topikDate').value = data.topikDate || '';
+    document.getElementById('goalI').classList.toggle('active', data.topikGoal==='I');
+    document.getElementById('goalII').classList.toggle('active', data.topikGoal==='II');
+    updateTopikCountdown();
+
+    const dow = DAY_KEYS[new Date().getDay()];
+    document.getElementById('todayTimeLabel').textContent = data.schedule[dow].time + ' · ' + (['sat','sun'].includes(dow) ? 'Амралтын өдрийн хуваарь' : 'Ажлын өдрийн хуваарь');
+  }
+  document.getElementById('topikDate').addEventListener('change', (e)=>{
+    data.topikDate = e.target.value; saveLocal(); updateTopikCountdown();
+  });
+  document.getElementById('goalI').addEventListener('click', ()=>{ data.topikGoal='I'; saveLocal(); renderSchedule(); });
+  document.getElementById('goalII').addEventListener('click', ()=>{ data.topikGoal='II'; saveLocal(); renderSchedule(); });
+  function updateTopikCountdown(){
+    const el = document.getElementById('topikDays');
+    if(!data.topikDate){ el.textContent = 'D-–'; return; }
+    const target = new Date(data.topikDate+'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    const diff = Math.round((target-now)/86400000);
+    el.textContent = 'D-' + (diff >= 0 ? diff : 0);
+  }
+
+  // ---------- Roadmap ----------
+  function monthsElapsed(){
+    if(!data.startDate) return 0;
+    const start = new Date(data.startDate+'T00:00:00');
+    const now = new Date(); now.setHours(0,0,0,0);
+    const days = Math.floor((now-start)/86400000);
+    return days;
+  }
+  function renderRoadmap(){
+    const daysIn = monthsElapsed();
+    const koreaDetails = document.getElementById('koreaDetails');
+    let overallPct = 0;
+    if(data.startDate){
+      overallPct = Math.min(100, Math.max(0, Math.round((daysIn/360)*100)));
+    }
+    document.getElementById('overallBarFill').style.width = overallPct+'%';
+    document.getElementById('overallBarPct').textContent = 'Ерөнхий явц: ' + overallPct + '%';
+    document.getElementById('roadmapHint').style.display = data.startDate ? 'none' : 'block';
+
+    const currentMonth = data.startDate ? Math.min(12, Math.floor(daysIn/30)+1) : 0;
+    koreaDetails.style.display = (data.startDate && currentMonth>=7) ? 'block' : 'none';
+
+    const list = document.getElementById('roadmapList');
+    let html = '';
+    ROADMAP.forEach((m,i)=>{
+      if(i===0 || ROADMAP[i-1].phase!==m.phase){
+        html += `<div class="phase-divider">${m.phase==='mn' ? '🇲🇳 MONTH 1–6 — MONGOLIA' : '🇰🇷 MONTH 7–12 — KOREA'}</div>`;
+      }
+      let pct = 0;
+      if(data.startDate){
+        const monthStartDay = (m.month-1)*30, monthEndDay = m.month*30;
+        if(daysIn >= monthEndDay) pct = 100;
+        else if(daysIn <= monthStartDay) pct = 0;
+        else pct = Math.round(((daysIn-monthStartDay)/30)*100);
+      }
+      const isCurrent = m.month===currentMonth;
+      html += `<div class="month-card ${isCurrent?'current':''}">
+        <div class="month-head"><span class="month-tag">MONTH ${m.month}</span></div>
+        <div class="month-title">${escapeHtml(m.title)}</div>
+        <div class="month-desc">${escapeHtml(m.desc)}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;"></div></div>
+        <div class="bar-pct">${pct}%</div>
+      </div>`;
+    });
+    list.innerHTML = html;
+  }
+
+  // ---------- Korea Mode ----------
+  function renderKoreaCatGrid(){
+    document.getElementById('catGrid').innerHTML = KOREA_CATEGORIES.map(c=>`
+      <div class="cat-btn ${c.key===activeKoreaCat?'active':''}" data-cat="${c.key}">
+        <span class="ic">${c.icon}</span><span class="lb">${c.label}</span>
+      </div>`).join('');
+    document.querySelectorAll('.cat-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        activeKoreaCat = btn.dataset.cat;
+        renderKoreaCatGrid();
+        renderKoreaWordList();
+      });
+    });
+  }
+  function renderKoreaWordList(){
+    const words = data.vocab.filter(w=>w.category===activeKoreaCat);
+    const box = document.getElementById('catWordList');
+    if(!words.length){
+      box.innerHTML = '<div class="empty">Энэ ангилалд хэллэг алга.</div>';
+      return;
+    }
+    box.innerHTML = words.map(w=>`
+      <div class="word-row">
+        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
+        <button class="del-btn" data-id="${w.id}" title="Устгах">×</button>
+      </div>
+    `).join('');
+    box.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>deleteWord(btn.dataset.id));
+    });
+  }
+  function renderKoreaMode(){ renderKoreaCatGrid(); renderKoreaWordList(); }
+  document.getElementById('addKoreaBtn').addEventListener('click', async ()=>{
+    const kr = document.getElementById('koreaKr').value.trim();
+    const mn = document.getElementById('koreaMn').value.trim();
+    if(!kr || !mn) return;
+    const today = todayStr();
+    const localId = 'local-'+Date.now()+Math.random().toString(36).slice(2,6);
+    const word = {id:localId, kr, mn, ex:'', exTranslation:'', level:0, nextReview:today, created:today, category:activeKoreaCat};
+    data.vocab.push(word);
+    document.getElementById('koreaKr').value=''; document.getElementById('koreaMn').value='';
+    saveLocal(); renderKoreaWordList();
+    const res = await apiPost({action:'add', kr, mn, ex:'', exTranslation:'', category:activeKoreaCat});
+    if(res && res.success){ word.id = String(res.id); saveLocal(); }
+  });
+
+  // ---------- Progress ----------
+  function renderProgress(){
+    const {streak, longest} = computeStreak();
+    const totalStudyDays = Object.keys(data.dailyTasks).filter(d=>isDayComplete(data.dailyTasks[d]) || Object.values(data.dailyTasks[d]).some(Boolean)).length;
+    let totalMinutes = 0, grammarDays = 0, listeningMinutes = 0, speakingDays = 0;
+    Object.values(data.dailyTasks).forEach(tasks=>{
+      DAILY_TASKS_DEF.forEach(td=>{
+        if(tasks[td.key]) totalMinutes += td.minutes;
+      });
+      if(tasks.grammar) grammarDays++;
+      if(tasks.listening) listeningMinutes += 15;
+      if(tasks.speaking) speakingDays++;
+    });
+    const gw = data.vocab.filter(w=>w.category==='general');
+    const mastered = gw.filter(w=>w.level>=INTERVALS.length-1).length;
+    const daysIn = monthsElapsed();
+    const overallPct = data.startDate ? Math.min(100, Math.max(0, Math.round((daysIn/360)*100))) : 0;
+
+    document.getElementById('progressGrid').innerHTML = `
+      <div class="stat-box"><div class="n">${streak}</div><div class="l">Одоогийн дараалал</div></div>
+      <div class="stat-box"><div class="n">${longest}</div><div class="l">Хамгийн урт дараалал</div></div>
+      <div class="stat-box"><div class="n">${totalStudyDays}</div><div class="l">Нийт суралцсан өдөр</div></div>
+      <div class="stat-box"><div class="n">${(totalMinutes/60).toFixed(1)}</div><div class="l">Нийт цаг</div></div>
+      <div class="stat-box"><div class="n">${gw.length}</div><div class="l">Нийт үг</div></div>
+      <div class="stat-box"><div class="n">${mastered}</div><div class="l">Эзэмшсэн үг</div></div>
+      <div class="stat-box"><div class="n">${grammarDays}</div><div class="l">Grammar хийсэн өдөр</div></div>
+      <div class="stat-box"><div class="n">${listeningMinutes}</div><div class="l">Listening минут</div></div>
+      <div class="stat-box"><div class="n">${speakingDays}</div><div class="l">Speaking хийсэн өдөр</div></div>
+      <div class="stat-box"><div class="n">${overallPct}%</div><div class="l">Ерөнхий явц</div></div>
+    `;
+
+    const grid = document.getElementById('heatGrid');
+    const set = new Set(data.streakLog);
+    const noteSet = new Set(data.lessonNotes.map(n=>n.date));
+    const cells = [];
+    const start = new Date(); start.setDate(start.getDate()-69);
+    for(let i=0;i<70;i++){
+      const d = new Date(start); d.setDate(start.getDate()+i);
+      const ds = todayStr(d);
+      let cls = '';
+      if(set.has(ds)) cls = 'on';
+      else if(noteSet.has(ds)) cls = 'noted';
+      cells.push(`<div class="cell ${cls}" title="${ds}"></div>`);
+    }
+    grid.innerHTML = cells.join('');
+  }
+
+  // ---------- Header / today date ----------
+  function renderHeader(){
+    document.getElementById('streakNum').textContent = computeStreak().streak;
+    const now = new Date();
+    document.getElementById('todayDate').textContent = now.toLocaleDateString('mn-MN', {month:'long', day:'numeric', weekday:'long'});
+  }
+
+  function render(){
+    renderHeader();
+    renderTaskList();
+    renderLessonNotes();
+    renderSchedule();
+    renderRoadmap();
+    renderProgress();
+    renderVocabStats();
+    renderWordList();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
