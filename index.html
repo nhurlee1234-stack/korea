@@ -1603,7 +1603,7 @@
   function buildTestPool(){
     const levelSel = document.getElementById('testLevelSelect').value;
     const sourceSel = document.getElementById('testSourceSelect').value;
-    let pool = data.vocab.filter(w=>w.category==='general');
+    let pool = data.vocab.filter(w=>w.category==='general' && w.kr && w.kr.trim() && w.mn && w.mn.trim());
     if(sourceSel === 'weak') pool = pool.filter(w=>(w.forgotStreak||0)>=3);
     if(levelSel !== 'all') pool = pool.filter(w=>String(w.bankLevel||1)===levelSel);
     return pool;
