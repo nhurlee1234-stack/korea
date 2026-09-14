@@ -172,6 +172,12 @@
   .test-opt.correct{background:var(--green); border-color:var(--green); color:var(--paper);}
   .test-opt.wrong{background:var(--red); border-color:var(--red); color:var(--paper);}
   .test-result{text-align:center; color:var(--paper); font-family:'Noto Serif KR',serif; font-size:26px; font-weight:700; padding:20px 0;}
+  .timer-badge{font-family:'Noto Serif KR',serif; font-weight:700; font-size:14px; color:var(--paper);}
+  .timer-badge.low{color:var(--red-soft);}
+  .test-topic-row{display:flex; justify-content:space-between; font-size:12.5px; padding:5px 0; color:var(--celadon);}
+  .wrong-word-row{background:rgba(255,255,255,0.06); border-radius:8px; padding:10px; margin-bottom:8px;}
+  .wrong-word-row .wk{color:var(--paper); font-family:'Noto Serif KR',serif; font-weight:600;}
+  .wrong-word-row .wm{color:var(--celadon); font-size:12.5px;}
 
   /* Vocab stats + filters */
   .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px;}
@@ -373,19 +379,23 @@
   <div class="review-overlay" id="testOverlay">
     <div class="review-top">
       <span id="testProgress">0 / 0</span>
+      <span class="timer-badge" id="testTimer" style="display:none;"></span>
       <button class="review-close" id="closeTestBtn">✕</button>
     </div>
     <div class="review-body">
       <div class="flash-stage" id="testStage" style="cursor:default;">
         <div class="kr" id="testKr">단어</div>
         <div class="romanization" id="testRoman" style="display:none;"></div>
+        <button class="speaker-btn" id="testSpeakerBtn" style="display:none;" title="Сонсох">🔊</button>
       </div>
       <div id="testOptions" style="display:flex; flex-direction:column; gap:10px; margin-top:16px;"></div>
       <div id="testTypeArea" style="display:none; margin-top:16px;">
         <input type="text" id="testTypeInput" placeholder="Солонгосоор бичнэ үү…" style="text-align:center; font-size:16px;">
         <button class="btn btn-primary" id="testTypeSubmitBtn" style="margin-top:10px; width:100%;">Шалгах</button>
         <div class="muted small" id="testTypeFeedback" style="margin-top:10px; text-align:center;"></div>
+        <button class="btn btn-primary" id="testTypeNextBtn" style="margin-top:10px; width:100%; display:none;">Дараах →</button>
       </div>
+      <div id="testResultArea" style="display:none;"></div>
     </div>
   </div>
 
@@ -420,12 +430,39 @@
     </details>
 
     <details class="card">
-      <summary><h2 style="display:inline;">Тест</h2></summary>
-      <p class="muted small" style="margin-top:10px;">Одоо байгаа үгсээсээ 10 асуулттай тест өгч, өөрийгөө шалгана. Зөв хариулсан үг Давталтад дахин ойрхон гарахгүй.</p>
-      <div style="display:flex; gap:8px; margin-top:8px;">
-        <button class="btn btn-primary btn-sm" id="startTestMcqBtn">Сонголттой</button>
+      <summary><h2 style="display:inline;">Шалгалт</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Одоо байгаа үгсээсээ шалгалт өгч өөрийгөө шалгана. Зөв хариулсан үг Давталтад дахин ойрхон гарахгүй.</p>
+
+      <label class="field" style="margin-top:10px;">Түвшин</label>
+      <select id="testLevelSelect">
+        <option value="all">Бүх түвшин</option>
+        <option value="1">Түвшин 1</option>
+        <option value="2">Түвшин 2</option>
+        <option value="3">Түвшин 3</option>
+        <option value="4">Түвшин 4</option>
+      </select>
+      <label class="field">Эх сурвалж</label>
+      <select id="testSourceSelect">
+        <option value="all">Бүх үг</option>
+        <option value="weak">Зөвхөн сул үг</option>
+      </select>
+      <label class="field">Асуултын тоо</label>
+      <select id="testCountSelect">
+        <option value="5">5</option>
+        <option value="10" selected>10</option>
+        <option value="20">20</option>
+      </select>
+      <label class="checkline" style="margin-top:10px; gap:8px;">
+        <input type="checkbox" id="testTimedChk"> <span class="small muted">Хугацаатай (асуулт бүрт 15 сек)</span>
+      </label>
+
+      <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" id="startTestMcqBtn">Тест</button>
         <button class="btn btn-ghost btn-sm" id="startTestTypeBtn">Бичих</button>
+        <button class="btn btn-ghost btn-sm" id="startTestListenBtn">Сонсгол</button>
       </div>
+
+      <div id="testHistoryList" style="margin-top:14px;"></div>
     </details>
 
     <details class="card">
@@ -1160,14 +1197,15 @@
     topikDate: '',
     topikGoal: 'I',
     startDate: '',
-    appsScriptUrl: '',
+    appsScriptUrl: 'https://script.google.com/macros/s/AKfycbwUJ8im-VNjoY80v-3E5UwSreGUeiuwCDKCawDGSmnlpuNL4ia6l297AdGdAxYQMAVr5A/exec',
     sessionSize: 20,
     lessonNotes: [],
     dailyNewWordGoal: 15,
     dailyReviewGoal: 24,
     randomOrder: false,
     dailyCounts: {},
-    writingEntries: {}
+    writingEntries: {},
+    testHistory: []
   };
 
   let data = null;
@@ -1308,6 +1346,8 @@
     if(!data.schedule) data.schedule = defaultData.schedule;
     if(!data.lessonNotes) data.lessonNotes = [];
     if(!data.dailyCounts) data.dailyCounts = {};
+    if(!data.testHistory) data.testHistory = [];
+    if(!data.appsScriptUrl) data.appsScriptUrl = defaultData.appsScriptUrl;
     if(!data.writingEntries) data.writingEntries = {};
     if(!data.dailyNewWordGoal) data.dailyNewWordGoal = 15;
     if(!data.dailyReviewGoal) data.dailyReviewGoal = 24;
@@ -1552,60 +1592,125 @@
       : '<div class="empty">Одоогоор бүрэн нэмчихсэн бүлэг алга.</div>';
   }
 
-  // ---------- MCQ / Typing Test ----------
+  // ---------- Test (MCQ / Typing / Listening) ----------
   let testQuestions = [];
   let testIndex = 0;
   let testScore = 0;
   let testMode = 'mcq';
+  let testTimerInterval = null;
+  let testTimeLeft = 0;
+
+  function buildTestPool(){
+    const levelSel = document.getElementById('testLevelSelect').value;
+    const sourceSel = document.getElementById('testSourceSelect').value;
+    let pool = data.vocab.filter(w=>w.category==='general');
+    if(sourceSel === 'weak') pool = pool.filter(w=>(w.forgotStreak||0)>=3);
+    if(levelSel !== 'all') pool = pool.filter(w=>String(w.bankLevel||1)===levelSel);
+    return pool;
+  }
+
   function startTest(mode){
     testMode = mode;
-    const pool = data.vocab.filter(w=>w.category==='general');
+    const pool = buildTestPool();
     if(pool.length < 4){
-      alert('Тест эхлэхийн тулд дор хаяж 4 үг хэрэгтэй.');
+      alert('Энэ шүүлтүүрээр дор хаяж 4 үг олдсонгүй. Түвшин/эх сурвалжаа өөрчилж үзнэ үү.');
       return;
     }
+    const count = Math.min(parseInt(document.getElementById('testCountSelect').value,10)||10, pool.length);
     const shuffled = shuffleArray(pool);
-    const count = Math.min(10, pool.length);
     testQuestions = shuffled.slice(0, count).map(w=>{
-      if(mode === 'mcq'){
-        const distractors = shuffleArray(pool.filter(x=>x.id!==w.id && x.mn!==w.mn)).slice(0,3).map(x=>x.mn);
-        const options = shuffleArray([w.mn, ...distractors]);
-        return {word:w, options, correct:w.mn};
+      const isCloze = w.ex && w.ex.includes(w.kr) && Math.random() < 0.3;
+      if(mode === 'typing'){
+        if(isCloze) return {word:w, cloze:true, prompt: w.ex.split(w.kr).join('▁▁▁▁'), correct:w.kr};
+        return {word:w, cloze:false, correct:w.kr};
       }
-      return {word:w, correct:w.kr};
+      // mcq and listening both use option-based answers
+      if(isCloze){
+        const distractors = shuffleArray(pool.filter(x=>x.id!==w.id && x.kr!==w.kr)).slice(0,3).map(x=>x.kr);
+        return {word:w, cloze:true, prompt: w.ex.split(w.kr).join('▁▁▁▁'), options: shuffleArray([w.kr, ...distractors]), correct:w.kr};
+      }
+      const distractors = shuffleArray(pool.filter(x=>x.id!==w.id && x.mn!==w.mn)).slice(0,3).map(x=>x.mn);
+      return {word:w, cloze:false, options: shuffleArray([w.mn, ...distractors]), correct:w.mn};
     });
     testIndex = 0; testScore = 0;
     document.getElementById('testOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('testResultArea').style.display = 'none';
     renderTestQuestion();
   }
+
+  function stopTestTimer(){
+    if(testTimerInterval){ clearInterval(testTimerInterval); testTimerInterval = null; }
+    document.getElementById('testTimer').style.display = 'none';
+  }
+  function startTestTimer(q){
+    stopTestTimer();
+    if(!document.getElementById('testTimedChk').checked) return;
+    testTimeLeft = 15;
+    const el = document.getElementById('testTimer');
+    el.style.display = 'inline';
+    el.classList.remove('low');
+    el.textContent = testTimeLeft + 's';
+    testTimerInterval = setInterval(()=>{
+      testTimeLeft--;
+      el.textContent = testTimeLeft + 's';
+      if(testTimeLeft <= 5) el.classList.add('low');
+      if(testTimeLeft <= 0){
+        stopTestTimer();
+        answerTest(false, q, null);
+      }
+    }, 1000);
+  }
+
   function renderTestQuestion(){
-    document.getElementById('testOptions').style.display = testMode === 'mcq' ? 'flex' : 'none';
+    document.getElementById('testOptions').style.display = (testMode === 'mcq' || testMode === 'listening') ? 'flex' : 'none';
     document.getElementById('testTypeArea').style.display = testMode === 'typing' ? 'block' : 'none';
-    if(testIndex >= testQuestions.length){ showTestResults(); return; }
+    document.getElementById('testResultArea').style.display = 'none';
+    document.getElementById('testSpeakerBtn').style.display = 'none';
+    if(testIndex >= testQuestions.length){ stopTestTimer(); showTestResults(); return; }
     const q = testQuestions[testIndex];
     document.getElementById('testProgress').textContent = (testIndex+1) + ' / ' + testQuestions.length;
     document.getElementById('testTypeFeedback').textContent = '';
-    if(testMode === 'mcq'){
-      document.getElementById('testKr').textContent = q.word.kr;
-      document.getElementById('testRoman').textContent = romanize(q.word.kr);
-      document.getElementById('testRoman').style.display = 'block';
+    document.getElementById('testRoman').style.display = 'none';
+
+    if(testMode === 'listening'){
+      document.getElementById('testKr').textContent = q.cloze ? '( ? )' : '?';
+      const spk = document.getElementById('testSpeakerBtn');
+      spk.style.display = 'inline-flex';
+      spk.dataset.speak = q.cloze ? q.word.ex : q.word.kr;
       const box = document.getElementById('testOptions');
       box.innerHTML = q.options.map(o=>`<button class="test-opt" data-o="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('');
       box.querySelectorAll('.test-opt').forEach(btn=>{
         btn.addEventListener('click', ()=>answerTest(btn.dataset.o === q.correct, q, btn));
       });
-    } else {
-      document.getElementById('testKr').textContent = q.word.mn;
-      document.getElementById('testRoman').style.display = 'none';
+      // auto-play once
+      setTimeout(()=>spk.click(), 200);
+    } else if(testMode === 'mcq'){
+      document.getElementById('testKr').textContent = q.cloze ? q.prompt : q.word.kr;
+      if(!q.cloze){
+        document.getElementById('testRoman').textContent = romanize(q.word.kr);
+        document.getElementById('testRoman').style.display = 'block';
+      }
+      const box = document.getElementById('testOptions');
+      box.innerHTML = q.options.map(o=>`<button class="test-opt" data-o="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join('');
+      box.querySelectorAll('.test-opt').forEach(btn=>{
+        btn.addEventListener('click', ()=>answerTest(btn.dataset.o === q.correct, q, btn));
+      });
+    } else { // typing
+      document.getElementById('testKr').textContent = q.cloze ? q.prompt : q.word.mn;
       const input = document.getElementById('testTypeInput');
       input.value = '';
       input.disabled = false;
+      document.getElementById('testTypeSubmitBtn').style.display = 'block';
+      document.getElementById('testTypeNextBtn').style.display = 'none';
       setTimeout(()=>input.focus(), 50);
     }
+    startTestTimer(q);
   }
+
   function answerTest(correct, q, btn){
-    if(testMode === 'mcq'){
+    stopTestTimer();
+    if(testMode === 'mcq' || testMode === 'listening'){
       document.querySelectorAll('#testOptions .test-opt').forEach(b=>{
         b.disabled = true;
         if(b.dataset.o === q.correct) b.classList.add('correct');
@@ -1613,14 +1718,28 @@
       });
     } else {
       document.getElementById('testTypeInput').disabled = true;
+      document.getElementById('testTypeSubmitBtn').style.display = 'none';
+      document.getElementById('testTypeNextBtn').style.display = 'block';
       const fb = document.getElementById('testTypeFeedback');
       fb.textContent = correct ? 'Зөв!' : ('Буруу — зөв хариулт: ' + q.correct + ' (' + romanize(q.correct) + ')');
     }
     if(correct) testScore++;
+    else q.wrong = true;
     applySrsGrade(q.word, correct);
     saveLocal();
-    setTimeout(()=>{ testIndex++; renderTestQuestion(); }, testMode==='mcq' ? 700 : 1100);
+    if(testMode === 'mcq' || testMode === 'listening'){
+      setTimeout(()=>{ testIndex++; renderTestQuestion(); }, 700);
+    }
   }
+  document.getElementById('testSpeakerBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const text = e.currentTarget.dataset.speak;
+    if(!text || !('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
   document.getElementById('testTypeSubmitBtn').addEventListener('click', ()=>{
     const q = testQuestions[testIndex];
     if(!q) return;
@@ -1628,19 +1747,83 @@
     if(!val) return;
     answerTest(val === q.correct, q);
   });
+  document.getElementById('testTypeNextBtn').addEventListener('click', ()=>{
+    testIndex++;
+    renderTestQuestion();
+  });
   document.getElementById('testTypeInput').addEventListener('keydown', (e)=>{
     if(e.key === 'Enter') document.getElementById('testTypeSubmitBtn').click();
   });
+
   function showTestResults(){
     document.getElementById('testKr').textContent = '';
     document.getElementById('testRoman').style.display = 'none';
     document.getElementById('testTypeArea').style.display = 'none';
-    document.getElementById('testOptions').style.display = 'flex';
-    document.getElementById('testOptions').innerHTML = `<div class="test-result">${testScore} / ${testQuestions.length} зөв</div>`;
+    document.getElementById('testOptions').style.display = 'none';
+    document.getElementById('testSpeakerBtn').style.display = 'none';
+
+    const topicTally = {};
+    testQuestions.forEach(q=>{
+      const topic = q.word.bankTopic || 'Бусад';
+      if(!topicTally[topic]) topicTally[topic] = {correct:0, total:0};
+      topicTally[topic].total++;
+      if(!q.wrong) topicTally[topic].correct++;
+    });
+    const wrongWords = testQuestions.filter(q=>q.wrong).map(q=>q.word);
+
+    data.testHistory.push({
+      date: todayStr(), mode: testMode, score: testScore, total: testQuestions.length,
+      level: document.getElementById('testLevelSelect').value
+    });
+    if(data.testHistory.length > 30) data.testHistory = data.testHistory.slice(-30);
+    saveLocal();
+
+    const topicHtml = Object.keys(topicTally).map(t=>{
+      const s = topicTally[t];
+      return `<div class="test-topic-row"><span>${escapeHtml(t)}</span><span>${s.correct}/${s.total}</span></div>`;
+    }).join('');
+
+    const wrongHtml = wrongWords.length
+      ? wrongWords.map(w=>`<div class="wrong-word-row"><div class="wk">${escapeHtml(w.kr)}</div><div class="wm">${escapeHtml(w.mn)}</div></div>`).join('')
+      : `<div class="muted small" style="color:var(--celadon);">Бүх асуултад зөв хариуллаа 🎉</div>`;
+
+    const area = document.getElementById('testResultArea');
+    area.style.display = 'block';
+    area.innerHTML = `
+      <div class="test-result">${testScore} / ${testQuestions.length} зөв</div>
+      ${topicHtml}
+      <div style="margin-top:14px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.15);">
+        <div class="muted small" style="color:var(--celadon); margin-bottom:8px;">Буруу хариулсан үгс:</div>
+        ${wrongHtml}
+      </div>
+      ${wrongWords.length ? '<button class="btn btn-primary" id="retryWrongBtn" style="width:100%; margin-top:12px;">Буруу хариулсан үгсээ давтах</button>' : ''}
+    `;
+    if(wrongWords.length){
+      document.getElementById('retryWrongBtn').addEventListener('click', ()=>{
+        document.getElementById('testOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+        reviewQueue = wrongWords;
+        openReview();
+      });
+    }
+    renderTestHistory();
   }
+
+  function renderTestHistory(){
+    const el = document.getElementById('testHistoryList');
+    if(!el) return;
+    if(!data.testHistory.length){ el.innerHTML = ''; return; }
+    const modeLabels = {mcq:'Тест', typing:'Бичих', listening:'Сонсгол'};
+    const recent = [...data.testHistory].reverse().slice(0,8);
+    el.innerHTML = '<div class="small muted" style="margin-bottom:6px;">Сүүлийн шалгалтууд</div>'
+      + recent.map(h=>`<div class="dd-row"><span>${escapeHtml(h.date)} · ${modeLabels[h.mode]||h.mode}</span><span>${h.score}/${h.total}</span></div>`).join('');
+  }
+
   document.getElementById('startTestMcqBtn').addEventListener('click', ()=>startTest('mcq'));
   document.getElementById('startTestTypeBtn').addEventListener('click', ()=>startTest('typing'));
+  document.getElementById('startTestListenBtn').addEventListener('click', ()=>startTest('listening'));
   document.getElementById('closeTestBtn').addEventListener('click', ()=>{
+    stopTestTimer();
     document.getElementById('testOverlay').classList.remove('open');
     document.body.style.overflow = '';
     refreshVocabTab();
@@ -1662,7 +1845,9 @@
     box.querySelectorAll('button').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const group = allWordBankGroups()[parseInt(btn.dataset.bi,10)];
-        lastSuggestions = group.words.filter(w=>!data.vocab.some(v=>v.category==='general' && v.kr===w.kr));
+        lastSuggestions = group.words
+          .filter(w=>!data.vocab.some(v=>v.category==='general' && v.kr===w.kr))
+          .map(w=>({...w, bankLevel: group.level||1, bankTopic: group.topic}));
         lastSuggestTopic = group.topic + (lastSuggestions.length < group.words.length ? ' (зарим нь аль хэдийн байгаа тул алгассан)' : '');
         renderSuggestList();
       });
@@ -1696,7 +1881,7 @@
       if(!s || !s.kr || !s.mn) continue;
       if(data.vocab.some(w=>w.category==='general' && w.kr===s.kr)) continue;
       const localId = 'local-'+Date.now()+Math.random().toString(36).slice(2,6)+'-'+i;
-      const word = {id: localId, kr:s.kr, mn:s.mn, ex:s.ex||'', exTranslation:s.exTranslation||'', level:0, nextReview:today, created:today, category:'general', autoEx:false};
+      const word = {id: localId, kr:s.kr, mn:s.mn, ex:s.ex||'', exTranslation:s.exTranslation||'', level:0, nextReview:today, created:today, category:'general', autoEx:false, bankLevel:s.bankLevel||1, bankTopic:s.bankTopic||''};
       data.vocab.push(word);
       addedCount++;
       apiPost({action:'add', kr:s.kr, mn:s.mn, ex:s.ex||'', exTranslation:s.exTranslation||'', category:'general'}).then(res=>{
@@ -1744,13 +1929,28 @@
     document.getElementById('randomOrderChk').checked = !!data.randomOrder;
     const due = dueWords('general');
     const cap = data.sessionSize || 20;
-    document.getElementById('dueSummaryText').textContent = due.length
-      ? due.length + ' үг өнөөдөр давтах хугацаатай' + (due.length > cap ? ` — session бүрт ${cap}-аар хийнэ.` : '.')
-      : 'Өнөөдөр давтах үг алга — шинэ үг нэмж болно.';
-    document.getElementById('startReviewBtn').disabled = !due.length;
-    let queue = [...due].sort((a,b)=> a.nextReview.localeCompare(b.nextReview));
-    if(data.randomOrder) queue = shuffleArray(queue);
-    reviewQueue = queue.slice(0, cap);
+    const startBtn = document.getElementById('startReviewBtn');
+    if(due.length){
+      document.getElementById('dueSummaryText').textContent = due.length + ' үг өнөөдөр давтах хугацаатай' + (due.length > cap ? ` — session бүрт ${cap}-аар хийнэ.` : '.');
+      startBtn.disabled = false;
+      startBtn.textContent = 'Давталт эхлүүлэх →';
+      let queue = [...due].sort((a,b)=> a.nextReview.localeCompare(b.nextReview));
+      if(data.randomOrder) queue = shuffleArray(queue);
+      reviewQueue = queue.slice(0, cap);
+    } else {
+      const pool = data.vocab.filter(w=>w.category==='general');
+      if(pool.length){
+        document.getElementById('dueSummaryText').textContent = 'Өнөөдрийн давталт дууслаа — хүсвэл нэмэлт дадлага хийж болно.';
+        startBtn.disabled = false;
+        startBtn.textContent = 'Нэмэлт дадлага хийх →';
+        reviewQueue = shuffleArray(pool).slice(0, cap);
+      } else {
+        document.getElementById('dueSummaryText').textContent = 'Одоогоор үг алга — эхлээд Бэлэн үгийн сангаас нэмнэ үү.';
+        startBtn.disabled = true;
+        startBtn.textContent = 'Давталт эхлүүлэх →';
+        reviewQueue = [];
+      }
+    }
 
     const weak = data.vocab.filter(w=>w.category==='general' && (w.forgotStreak||0)>=3);
     document.getElementById('weakCount').textContent = weak.length;
@@ -2420,6 +2620,7 @@
     renderWordList();
     renderWordBankTopics();
     renderAddedGroups();
+    renderTestHistory();
   }
 
   init();
