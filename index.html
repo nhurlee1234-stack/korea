@@ -79,6 +79,7 @@
   .btn-primary{background:var(--indigo-deep); color:var(--paper);}
   .btn-done{background:var(--red); color:var(--paper);}
   .btn-ghost{background:transparent; color:var(--indigo-deep); border:1px solid var(--line);}
+  .review-overlay .btn-ghost{color:var(--paper); border-color:rgba(255,255,255,0.35);}
   .btn-sm{padding:6px 11px; font-size:12px;}
   .btn:disabled{opacity:0.45; cursor:default;}
 
@@ -95,7 +96,8 @@
   .task-row{display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--line);}
   .task-row:last-child{border-bottom:none;}
   .task-row input[type=checkbox]{width:19px; height:19px; accent-color:var(--red); flex:0 0 auto;}
-  .task-icon{font-size:18px; width:24px; text-align:center;}
+  .auto-progress{margin-bottom:12px;}
+  .auto-progress-row{display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:4px; color:var(--ink-soft);}
   .task-label{flex:1; font-size:14px;}
   .task-min{font-size:11.5px; color:var(--ink-soft);}
   .task-row.done .task-label{color:var(--ink-soft); text-decoration:line-through;}
@@ -129,6 +131,8 @@
   .kr.cloze-mode{font-size:19px; font-weight:500; font-family:'Inter',sans-serif; line-height:1.5; font-style:italic;}
   .pill.leech{background:#F3D9B1; color:#8A5A20;}
   .flash-stage .kr{font-family:'Noto Serif KR',serif; font-size:28px; font-weight:700;}
+  .romanization{font-size:12px; color:#B9C4D3; margin-top:4px; letter-spacing:0.02em;}
+  .word-mn .romanization, .word-row .romanization, .suggest-row .romanization{color:var(--ink-soft); margin-top:1px;}
   .flash-stage .mn{font-family:'Inter',sans-serif; font-size:15px; margin-top:10px; color:var(--celadon);}
   .flash-stage .ex{font-size:12px; margin-top:8px; color:#B9C4D3; font-style:italic;}
   .flash-stage .extr{font-size:11.5px; margin-top:3px; color:#8695A8;}
@@ -175,6 +179,16 @@
 
   .word-list{margin-top:6px;}
   .word-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);}
+  .edit-btn{background:transparent; border:none; color:var(--ink-soft); font-size:14px; cursor:pointer; width:24px; height:24px; border-radius:6px;}
+  .edit-btn:hover{background:var(--celadon);}
+  .checkline{display:flex; align-items:center; cursor:pointer;}
+  .listening-box{background:var(--indigo-deep); border-radius:10px; padding:20px; text-align:center;}
+  .listening-sentence{color:var(--paper); font-family:'Noto Serif KR',serif; font-size:16px;}
+  .listening-translation{color:var(--celadon); font-size:13px; margin-top:8px;}
+  .suggest-row{display:flex; align-items:flex-start; gap:10px; padding:9px 0; border-bottom:1px solid var(--line);}
+  .suggest-row:last-child{border-bottom:none;}
+  .suggest-row input[type=checkbox]{margin-top:3px; width:17px; height:17px; accent-color:var(--indigo-deep); flex:0 0 auto;}
+  .suggest-ex{font-size:11.5px; color:var(--ink-soft); font-style:italic; margin-top:2px;}
   .word-row:last-child{border-bottom:none;}
   .word-kr{font-family:'Noto Serif KR',serif; font-weight:600; font-size:15px;}
   .word-mn{font-size:12.5px; color:var(--ink-soft);}
@@ -229,10 +243,19 @@
   .stat-box{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center;}
   .stat-box .n{font-family:'Noto Serif KR',serif; font-size:22px; font-weight:700; color:var(--indigo-deep);}
   .stat-box .l{font-size:11px; color:var(--ink-soft); margin-top:2px;}
-  .heat{display:grid; grid-template-columns:repeat(14, 1fr); gap:4px; margin-top:6px;}
+  .heat{display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin-top:0;}
   .heat .cell{aspect-ratio:1; border-radius:3px; background:var(--line);}
   .heat .cell.on{background:var(--red);}
   .heat .cell.noted{background:var(--gold);}
+  .heat .cell.empty{background:transparent;}
+  .heat .cell.future{background:var(--celadon); opacity:0.5;}
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .cal-nav{background:transparent; border:1px solid var(--line); color:var(--indigo-deep); width:30px; height:30px; border-radius:8px; font-size:16px; cursor:pointer;}
+  .cal-weekdays{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; text-align:center;}
+  .cal-weekdays span{font-size:10.5px; color:var(--ink-soft); font-weight:600;}
+  .heat .cell{position:relative;}
+  .heat .cell .daynum{position:absolute; top:2px; left:4px; font-size:8px; color:var(--ink-soft);}
+  .heat .cell.on .daynum, .heat .cell.noted .daynum{color:rgba(255,255,255,0.75);}
   .empty{text-align:center; padding:26px 10px; color:var(--ink-soft); font-size:13.5px;}
   .overall-bar{margin-bottom:14px;}
 
@@ -273,17 +296,36 @@
 
   <!-- VOCAB -->
   <section class="panel active" id="panel-vocab">
-    <div class="stat-strip" id="vocabStats"></div>
+    <div class="card">
+      <h2>7 хоногийн зорилт</h2>
+      <div class="muted" id="weeklyGoalText">Энэ 7 хоногт нэмсэн шинэ үг: 0 / 100</div>
+      <div class="bar-track" style="margin-top:8px;"><div class="bar-fill" id="weeklyGoalBar" style="width:0%;"></div></div>
+    </div>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">Бэлэн үгийн бүлгүүд</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Бэлэн бэлтгэсэн бүлгээс сонгож нэг дор олон үг нэм — интернэт/AI шаардлагагүй.</p>
+      <div class="filter-row" id="wordBankTopics" style="margin-top:8px;"></div>
+    </details>
+
+    <div class="card" id="suggestResultCard" style="display:none;">
+      <h2>Санал болгосон үгс</h2>
+      <div id="suggestList" style="margin-top:8px;"></div>
+      <button class="btn btn-primary btn-sm" id="addSuggestedBtn" style="margin-top:10px;">Сонгосноо нэмэх</button>
+    </div>
 
     <div class="card" id="reviewPromptCard">
       <h2>Давталт</h2>
       <div class="muted" id="dueSummaryText">Ачаалж байна…</div>
-      <button class="btn btn-primary" id="startReviewBtn" style="margin-top:12px;">Давталт эхлүүлэх →</button>
+      <label class="checkline" style="margin-top:10px; gap:8px;">
+        <input type="checkbox" id="randomOrderChk"> <span class="small muted">Санамсаргүй дараалал</span>
+      </label>
+      <button class="btn btn-primary" id="startReviewBtn" style="margin-top:8px;">Давталт эхлүүлэх →</button>
     </div>
 
-    <div class="card">
-      <h2>Шинэ үг нэмэх</h2>
-      <label class="field">Солонгос үг</label>
+    <details class="card">
+      <summary><h2 style="display:inline;">Шинэ үг нэмэх</h2></summary>
+      <label class="field" style="margin-top:10px;">Солонгос үг</label>
       <input type="text" id="inKr" placeholder="예: 시작하다">
       <label class="field">Монгол утга</label>
       <input type="text" id="inMn" placeholder="эхлэх">
@@ -292,19 +334,8 @@
       <label class="field">Жишээний орчуулга (заавал биш)</label>
       <input type="text" id="inExTr" placeholder="Өнөөдрөөс эхэлнэ.">
       <button class="btn btn-primary" style="margin-top:12px;" id="addWordBtn">Нэмэх</button>
-    </div>
-
-    <div class="card">
-      <h2>Бүх үг (<span id="wordTotal">0</span>)</h2>
-      <div class="filter-row" id="vocabFilters">
-        <button data-f="all" class="active">ALL</button>
-        <button data-f="new">NEW</button>
-        <button data-f="review">REVIEW</button>
-        <button data-f="mastered">MASTERED</button>
-        <button data-f="leech">ХҮНД</button>
-      </div>
-      <div class="word-list" id="wordList"></div>
-    </div>
+      <div class="note-feedback" id="addWordConfirm" style="display:none; margin-top:10px;"></div>
+    </details>
   </section>
 
   <!-- FULLSCREEN REVIEW OVERLAY -->
@@ -319,15 +350,12 @@
         <div class="swipe-tag know" id="tagKnow"></div>
         <div class="mode-pill" id="modePill">Таних</div>
         <div class="kr" id="flashKr">단어</div>
-        <button class="speaker-btn" id="speakerBtn" style="display:none;" title="Сонсох">Сонсох</button>
+        <div class="romanization" id="flashRoman" style="display:none;"></div>
+        <button class="speaker-btn" id="speakerBtn" style="display:none;" title="Сонсох">🔊</button>
         <div class="mn" id="flashMn" style="display:none;"></div>
         <div class="ex" id="flashEx" style="display:none;"></div>
         <div class="extr" id="flashExTr" style="display:none;"></div>
         <div class="hint" id="flashHint" style="display:none;"></div>
-      </div>
-      <div class="flash-actions" id="flashActions" style="display:none;">
-        <button class="btn btn-ghost" id="btnForgot">Мартсан</button>
-        <button class="btn btn-primary" id="btnKnew">Санасан</button>
       </div>
     </div>
   </div>
@@ -336,13 +364,48 @@
   <section class="panel" id="panel-progress">
     <div class="stat-grid" id="progressGrid"></div>
     <div class="card">
-      <h2>Сүүлийн 70 хоног</h2>
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrevBtn">‹</button>
+        <h2 id="calMonthLabel" style="margin:0;">Сар</h2>
+        <button class="cal-nav" id="calNextBtn">›</button>
+      </div>
+      <div class="cal-weekdays">
+        <span>Ня</span><span>Да</span><span>Мя</span><span>Лх</span><span>Пү</span><span>Ба</span><span>Бя</span>
+      </div>
       <div class="heat" id="heatGrid"></div>
     </div>
   </section>
 
   <!-- MORE (everything else, tucked away) -->
   <section class="panel" id="panel-more">
+
+    <details class="card">
+      <summary><h2 style="display:inline;">Дэлгэрэнгүй үгийн статистик</h2></summary>
+      <div class="stat-strip" id="vocabStats" style="margin-top:10px;"></div>
+      <div class="stat-strip" id="extraStats" style="margin-top:10px;"></div>
+      <div id="weakWordsCard" style="display:none; margin-top:6px;">
+        <p class="muted small">Хэд хэдэн удаа дараалан "Мартсан" болсон үгс (<span id="weakCount">0</span>). Эдгээрийг тусад нь илүү олон удаа давтвал зохимжтой.</p>
+        <button class="btn btn-ghost btn-sm" id="startWeakReviewBtn">Сул үгс давтах →</button>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">Бүх үг</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Нийт: <span id="wordTotal">0</span> үг</p>
+      <input type="text" id="vocabSearch" placeholder="Хайх…" style="margin-bottom:10px;">
+      <div class="filter-row" id="vocabFilters">
+        <button data-f="all" class="active">ALL</button>
+        <button data-f="new">NEW</button>
+        <button data-f="learning">LEARNING</button>
+        <button data-f="familiar">FAMILIAR</button>
+      </div>
+      <select id="vocabSort" style="margin-bottom:10px;">
+        <option value="newest">Шинээр нэмэгдсэн</option>
+        <option value="oldest">Хуучнаар нэмэгдсэн</option>
+        <option value="level">Түвшингээр</option>
+      </select>
+      <div class="word-list" id="wordList"></div>
+    </details>
 
     <details class="card" id="taskDetails">
       <summary><h2 style="display:inline;">Өнөөдрийн даалгавар</h2></summary>
@@ -378,6 +441,30 @@
     </details>
 
     <details class="card">
+      <summary><h2 style="display:inline;">Listening дасгал</h2></summary>
+      <p class="muted small" style="margin-top:10px;">Хадгалсан жишээ өгүүлбэрүүдээ сонсоод таах дасгал.</p>
+      <div id="listeningCard" style="margin-top:10px;">
+        <div class="listening-box">
+          <div class="listening-sentence" id="listeningSentence">Жишээ өгүүлбэртэй үг алга байна.</div>
+          <div class="listening-translation" id="listeningTranslation" style="display:none;"></div>
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px;">
+          <button class="btn btn-ghost btn-sm" id="listenPlayBtn">Сонсох</button>
+          <button class="btn btn-ghost btn-sm" id="listenRevealBtn">Харах</button>
+          <button class="btn btn-primary btn-sm" id="listenNextBtn">Дараагийн</button>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><h2 style="display:inline;">Өдөр тутмын бичих даалгавар</h2></summary>
+      <p class="muted small" style="margin-top:10px;" id="writingPrompt"></p>
+      <textarea id="writingInput" placeholder="2–5 өгүүлбэр Солонгосоор бичнэ үү…" style="min-height:90px;"></textarea>
+      <button class="btn btn-primary btn-sm" id="writingCheckBtn" style="margin-top:10px;">Шалгуулах</button>
+      <div class="note-feedback" id="writingFeedback" style="display:none;"></div>
+    </details>
+
+    <details class="card">
       <summary><h2 style="display:inline;">12 сарын аялал</h2></summary>
       <div class="overall-bar" style="margin-top:10px;">
         <div class="bar-track"><div class="bar-fill" id="overallBarFill" style="width:0%;"></div></div>
@@ -406,10 +493,17 @@
       <input type="url" id="appsScriptUrl" placeholder="https://script.google.com/macros/s/.../exec">
       <button class="btn btn-primary btn-sm" id="saveUrlBtn" style="margin-top:10px;">Хадгалж холбох</button>
       <div class="status-line"><div class="dot" id="syncDot"></div><span id="syncStatus">Тохируулаагүй — локал горимд ажиллаж байна</span></div>
+
+      <p class="muted small" style="margin-top:14px;">AI функц (жишээ зохиох, тэмдэглэл/бичвэр шалгах) Sheets холбосон үед ажиллахын тулд Apps Script дотор өөрийн Anthropic API key-г тохируулах шаардлагатай. Доорх зааврыг үз.</p>
+
       <label class="field">Хөтөлбөрийн эхлэх огноо</label>
       <input type="date" id="startDate">
       <label class="field">Нэг session-д хэдэн үг шалгах</label>
       <input type="text" id="sessionSizeInput" placeholder="20">
+      <label class="field">Өдөрт хэдэн шинэ үг нэмэх зорилт</label>
+      <input type="text" id="newWordGoalInput" placeholder="15">
+      <label class="field">Өдөрт хэдэн үг давтах зорилт</label>
+      <input type="text" id="reviewGoalInput" placeholder="24">
     </details>
 
   </section>
@@ -424,25 +518,24 @@
   const INTERVALS = [0,7,14,21,28,35,42];
 
   const DAILY_TASKS_DEF = [
-    {key:'grammar', icon:'📖', label:'Grammar', minutes:20},
-    {key:'vocab', icon:'🧠', label:'Vocabulary — 15 үг', minutes:10},
-    {key:'listening', icon:'🎧', label:'Listening', minutes:15},
-    {key:'speaking', icon:'🗣', label:'Speaking', minutes:10},
-    {key:'writing', icon:'✍️', label:'Writing', minutes:10},
+    {key:'grammar', label:'Grammar', minutes:20},
+    {key:'listening', label:'Listening', minutes:15},
+    {key:'speaking', label:'Speaking', minutes:10},
+    {key:'writing', label:'Writing', minutes:10},
   ];
 
   const ROADMAP = [
-    {month:1, phase:'mn', title:'한글 + Дуудлага', desc:'Хангыл цагаа болон дуудлагын үндэс'},
-    {month:2, phase:'mn', title:'Үндсэн дүрэм', desc:'Өгүүлбэрийн үндсэн бүтэц'},
-    {month:3, phase:'mn', title:'Одоо / Өнгөрсөн / Ирээдүй', desc:'Цаг үеийн дүрэм'},
-    {month:4, phase:'mn', title:'Өдөр тутмын яриа', desc:'Практик харилцан яриа'},
-    {month:5, phase:'mn', title:'Listening + Speaking', desc:'Сонсох, ярих чадвар'},
-    {month:6, phase:'mn', title:'TOPIK I бэлтгэл', desc:'Эхний шалгалтын бэлтгэл'},
+    {month:1, phase:'mn', title:'한글 + Дуудлага', desc:'Хангыл, үндсэн дуудлага, мэндчилгээ — 300 үгийн зорилт'},
+    {month:2, phase:'mn', title:'Үндсэн дүрэм', desc:'Үндсэн дүрэм, өдөр тутмын өгүүлбэр, сонсголын суурь'},
+    {month:3, phase:'mn', title:'Одоо / Өнгөрсөн / Ирээдүй', desc:'Цаг үеийн дүрэм, өдөр тутмын харилцан яриа'},
+    {month:4, phase:'mn', title:'Уншиж, урт өгүүлбэр', desc:'Урт өгүүлбэр, унших дадлага'},
+    {month:5, phase:'mn', title:'Listening + Speaking', desc:'Сонсох, ярих чадвар гүнзгийрүүлэх'},
+    {month:6, phase:'mn', title:'TOPIK I бэлтгэл', desc:'TOPIK I бэлтгэл, бодит амьдралын хэл'},
     {month:7, phase:'kr', title:'Survival Korean', desc:'Солонгост амьдрах анхан шатны хэл'},
     {month:8, phase:'kr', title:'Өдөр тутмын яриа', desc:'Бодит орчинд харилцах'},
     {month:9, phase:'kr', title:'Ажил / Сургуулийн хэл', desc:'Мэргэжлийн орчны хэл'},
     {month:10, phase:'kr', title:'Дунд шатны дүрэм', desc:'Илүү нарийн дүрэм, найруулга'},
-    {month:11, phase:'kr', title:'TOPIK бэлтгэл', desc:'Шалгалтын эцсийн бэлтгэл'},
+    {month:11, phase:'kr', title:'TOPIK бэлтгэл', desc:'TOPIK-ийн эцсийн бэлтгэл'},
     {month:12, phase:'kr', title:'TOPIK + бодит амьдрал', desc:'Шалгалт өгөх, бодит хэрэглээ'},
   ];
 
@@ -459,6 +552,559 @@
     {key:'phone', icon:'📞', label:'Phone call'},
   ];
 
+  const WORD_BANK = [
+    { topic:'Мэндчилгээ', level:1, words:[
+      {kr:'안녕하세요', mn:'Сайн байна уу', ex:'안녕하세요!', exTranslation:'Сайн байна уу!'},
+      {kr:'감사합니다', mn:'Баярлалаа', ex:'정말 감사합니다.', exTranslation:'Үнэхээр баярлалаа.'},
+      {kr:'죄송합니다', mn:'Уучлаарай', ex:'늦어서 죄송합니다.', exTranslation:'Хоцорсонд уучлаарай.'},
+      {kr:'반갑습니다', mn:'Танилцсандаа баяртай байна', ex:'만나서 반갑습니다.', exTranslation:'Танилцсандаа баяртай байна.'},
+      {kr:'안녕히 가세요', mn:'Сайн яваарай', ex:'안녕히 가세요!', exTranslation:'Сайн яваарай!'},
+      {kr:'네', mn:'Тийм', ex:'네, 맞아요.', exTranslation:'Тийм, зөв.'},
+      {kr:'아니요', mn:'Үгүй', ex:'아니요, 괜찮아요.', exTranslation:'Үгүй, зүгээр дээ.'},
+      {kr:'괜찮아요', mn:'Зүгээр дээ', ex:'저는 괜찮아요.', exTranslation:'Би зүгээр дээ.'},
+      {kr:'잘 지내요', mn:'Сайхан амьдарч байна', ex:'요즘 잘 지내요?', exTranslation:'Сүүлийн үед сайхан амьдарч байна уу?'},
+      {kr:'처음 뵙겠습니다', mn:'Анх удаа уулзаж байна', ex:'처음 뵙겠습니다.', exTranslation:'Анх удаа уулзаж байна.'},
+      {kr:'실례합니다', mn:'Уучлаарай (анхаарал татахад)', ex:'실례합니다, 저기요.', exTranslation:'Уучлаарай, өө тэнд.'},
+      {kr:'오랜만이에요', mn:'Удаж уулзсангүй', ex:'오랜만이에요!', exTranslation:'Удаж уулзсангүй шүү!'},
+      {kr:'축하합니다', mn:'Баяр хүргэе', ex:'생일 축하합니다.', exTranslation:'Төрсөн өдрийн баяр хүргэе.'},
+      {kr:'미안해요', mn:'Уучлаарай (энгийн)', ex:'정말 미안해요.', exTranslation:'Үнэхээр уучлаарай.'},
+      {kr:'여보세요', mn:'Байна уу (утсаар)', ex:'여보세요, 누구세요?', exTranslation:'Байна уу, хэн бэ?'},
+      {kr:'잘 먹겠습니다', mn:'Сайхан идье', ex:'잘 먹겠습니다!', exTranslation:'Сайхан идье!'},
+      {kr:'잘 먹었습니다', mn:'Сайхан идлээ', ex:'잘 먹었습니다.', exTranslation:'Сайхан идлээ.'},
+      {kr:'수고하셨습니다', mn:'Ажилласанд баярлалаа', ex:'오늘 수고하셨습니다.', exTranslation:'Өнөөдөр ажилласанд баярлалаа.'},
+      {kr:'화이팅', mn:'Амжилт хүсье', ex:'시험 화이팅!', exTranslation:'Шалгалтдаа амжилт хүсье!'},
+      {kr:'사랑해요', mn:'Хайртай шүү', ex:'가족을 사랑해요.', exTranslation:'Гэр бүлдээ хайртай.'},
+    ]},
+    { topic:'Тоо (1-10)', level:1, words:[
+      {kr:'일', mn:'нэг (тоолох)', ex:'일 층이에요.', exTranslation:'Энэ 1-р давхар.'},
+      {kr:'이', mn:'хоёр (тоолох)', ex:'이 개 주세요.', exTranslation:'2 ширхэг өгөөч.'},
+      {kr:'삼', mn:'гурав (тоолох)', ex:'삼 시예요.', exTranslation:'3 цаг боллоо.'},
+      {kr:'사', mn:'дөрөв (тоолох)', ex:'사 명이에요.', exTranslation:'4 хүн байна.'},
+      {kr:'오', mn:'тав (тоолох)', ex:'오 분만요.', exTranslation:'5 минут хүлээгээрэй.'},
+      {kr:'육', mn:'зургаа (тоолох)', ex:'육 월이에요.', exTranslation:'6 сар байна.'},
+      {kr:'칠', mn:'долоо (тоолох)', ex:'칠 시에 만나요.', exTranslation:'7 цагт уулзая.'},
+      {kr:'팔', mn:'найм (тоолох)', ex:'팔 살이에요.', exTranslation:'8 настай.'},
+      {kr:'구', mn:'ес (тоолох)', ex:'구 번 버스예요.', exTranslation:'9 дугаар автобус.'},
+      {kr:'십', mn:'арав (тоолох)', ex:'십 분 걸려요.', exTranslation:'10 минут явна.'},
+      {kr:'하나', mn:'нэг (эд юм)', ex:'하나만 주세요.', exTranslation:'Нэгийг л өгөөч.'},
+      {kr:'둘', mn:'хоёр (эд юм)', ex:'둘 다 좋아요.', exTranslation:'Хоёул сайн.'},
+      {kr:'셋', mn:'гурав (эд юм)', ex:'셋이서 왔어요.', exTranslation:'Гурвуулаа ирсэн.'},
+      {kr:'넷', mn:'дөрөв (эд юм)', ex:'넷 다 있어요.', exTranslation:'Дөрөв нь бүгд байна.'},
+      {kr:'다섯', mn:'тав (эд юм)', ex:'다섯 살이에요.', exTranslation:'Таван настай.'},
+      {kr:'여섯', mn:'зургаа (эд юм)', ex:'여섯 시예요.', exTranslation:'Зургаан цаг боллоо.'},
+      {kr:'일곱', mn:'долоо (эд юм)', ex:'일곱 명 있어요.', exTranslation:'Долоон хүн байна.'},
+      {kr:'여덟', mn:'найм (эд юм)', ex:'여덟 개 샀어요.', exTranslation:'Найман ширхэг авсан.'},
+      {kr:'아홉', mn:'ес (эд юм)', ex:'아홉 살이에요.', exTranslation:'Есөн настай.'},
+      {kr:'열', mn:'арав (эд юм)', ex:'열 개 있어요.', exTranslation:'Арван ширхэг байна.'},
+    ]},
+    { topic:'Гэр бүл', level:1, words:[
+      {kr:'가족', mn:'гэр бүл', ex:'가족이 몇 명이에요?', exTranslation:'Гэр бүлдээ хэдүүлээ вэ?'},
+      {kr:'아버지', mn:'аав', ex:'아버지는 의사예요.', exTranslation:'Аав маань эмч.'},
+      {kr:'어머니', mn:'ээж', ex:'어머니가 요리해요.', exTranslation:'Ээж хоол хийж байна.'},
+      {kr:'형', mn:'ах (эрэгтэй хүнд)', ex:'형이 있어요.', exTranslation:'Ах байдаг.'},
+      {kr:'언니', mn:'эгч (эмэгтэй хүнд)', ex:'언니가 예뻐요.', exTranslation:'Эгч гоо сайхан.'},
+      {kr:'오빠', mn:'ах (эмэгтэй хүнд)', ex:'오빠는 키가 커요.', exTranslation:'Ах өндөр.'},
+      {kr:'누나', mn:'эгч (эрэгтэй хүнд)', ex:'누나가 요리를 잘해요.', exTranslation:'Эгч сайн хоол хийдэг.'},
+      {kr:'동생', mn:'дүү', ex:'동생이 귀여워요.', exTranslation:'Дүү хөөрхөн.'},
+      {kr:'아들', mn:'хүү', ex:'아들이 학생이에요.', exTranslation:'Хүү сурагч.'},
+      {kr:'딸', mn:'охин', ex:'딸이 세 살이에요.', exTranslation:'Охин 3 настай.'},
+      {kr:'부모님', mn:'эцэг эх', ex:'부모님을 사랑해요.', exTranslation:'Эцэг эхээ хайрладаг.'},
+      {kr:'할아버지', mn:'өвөө', ex:'할아버지가 건강해요.', exTranslation:'Өвөө эрүүл байна.'},
+      {kr:'할머니', mn:'эмээ', ex:'할머니 댁에 가요.', exTranslation:'Эмээ рүүгээ явж байна.'},
+      {kr:'삼촌', mn:'авга/нагац ах', ex:'삼촌이 놀러 왔어요.', exTranslation:'Ах зочилж ирлээ.'},
+      {kr:'이모', mn:'нагац эгч', ex:'이모가 요리사예요.', exTranslation:'Нагац эгч тогооч.'},
+      {kr:'사촌', mn:'үеэл', ex:'사촌이랑 놀아요.', exTranslation:'Үеэлтэйгээ тоглож байна.'},
+      {kr:'남편', mn:'нөхөр', ex:'남편이 요리해요.', exTranslation:'Нөхөр хоол хийж байна.'},
+      {kr:'아내', mn:'эхнэр', ex:'아내가 예뻐요.', exTranslation:'Эхнэр гоо сайхан.'},
+      {kr:'아기', mn:'нярай хүүхэд', ex:'아기가 자요.', exTranslation:'Нярай унтаж байна.'},
+      {kr:'애완동물', mn:'тэжээвэр амьтан', ex:'애완동물이 있어요.', exTranslation:'Тэжээвэр амьтантай.'},
+    ]},
+    { topic:'Хоол', level:1, words:[
+      {kr:'밥', mn:'будаа/хоол', ex:'밥 먹었어요?', exTranslation:'Хоол идсэн үү?'},
+      {kr:'물', mn:'ус', ex:'물 주세요.', exTranslation:'Ус өгөөч.'},
+      {kr:'김치', mn:'кимчи', ex:'김치가 매워요.', exTranslation:'Кимчи халуун.'},
+      {kr:'고기', mn:'мах', ex:'고기를 좋아해요.', exTranslation:'Мах их таалагддаг.'},
+      {kr:'과일', mn:'жимс', ex:'과일을 먹어요.', exTranslation:'Жимс идэж байна.'},
+      {kr:'빵', mn:'талх', ex:'빵이 맛있어요.', exTranslation:'Талх амттай.'},
+      {kr:'커피', mn:'кофе', ex:'커피 한 잔 주세요.', exTranslation:'Нэг аяга кофе өгөөч.'},
+      {kr:'차', mn:'цай', ex:'차를 마셔요.', exTranslation:'Цай уугаад байна.'},
+      {kr:'맛있어요', mn:'амттай байна', ex:'이거 맛있어요.', exTranslation:'Энэ амттай.'},
+      {kr:'배고파요', mn:'өлсөж байна', ex:'저는 배고파요.', exTranslation:'Би өлсөж байна.'},
+      {kr:'국', mn:'шөл', ex:'국이 뜨거워요.', exTranslation:'Шөл халуун байна.'},
+      {kr:'라면', mn:'рамен', ex:'라면을 끓여요.', exTranslation:'Рамен буцалгаж байна.'},
+      {kr:'계란', mn:'өндөг', ex:'계란을 먹어요.', exTranslation:'Өндөг идэж байна.'},
+      {kr:'우유', mn:'сүү', ex:'우유를 마셔요.', exTranslation:'Сүү ууж байна.'},
+      {kr:'설탕', mn:'элсэн чихэр', ex:'설탕을 넣어요.', exTranslation:'Элсэн чихэр хийж байна.'},
+      {kr:'소금', mn:'давс', ex:'소금이 필요해요.', exTranslation:'Давс хэрэгтэй байна.'},
+      {kr:'야채', mn:'ногоо', ex:'야채를 씻어요.', exTranslation:'Ногоо угааж байна.'},
+      {kr:'생선', mn:'загас', ex:'생선을 구워요.', exTranslation:'Загас шарж байна.'},
+      {kr:'아이스크림', mn:'зайрмаг', ex:'아이스크림 먹고 싶어요.', exTranslation:'Зайрмаг идмээр байна.'},
+      {kr:'배불러요', mn:'цадсан байна', ex:'저는 배불러요.', exTranslation:'Би цадсан байна.'},
+    ]},
+    { topic:'Цаг хугацаа', level:1, words:[
+      {kr:'오늘', mn:'өнөөдөр', ex:'오늘 뭐 해요?', exTranslation:'Өнөөдөр юу хийх вэ?'},
+      {kr:'내일', mn:'маргааш', ex:'내일 만나요.', exTranslation:'Маргааш уулзая.'},
+      {kr:'어제', mn:'өчигдөр', ex:'어제 바빴어요.', exTranslation:'Өчигдөр завгүй байсан.'},
+      {kr:'지금', mn:'одоо', ex:'지금 가요.', exTranslation:'Одоо явж байна.'},
+      {kr:'아침', mn:'өглөө', ex:'아침에 먹어요.', exTranslation:'Өглөө иднэ.'},
+      {kr:'저녁', mn:'орой', ex:'저녁에 봐요.', exTranslation:'Оройд уулзана.'},
+      {kr:'시간', mn:'цаг хугацаа', ex:'시간이 없어요.', exTranslation:'Цаг байхгүй байна.'},
+      {kr:'매일', mn:'өдөр бүр', ex:'매일 운동해요.', exTranslation:'Өдөр бүр дасгал хийдэг.'},
+      {kr:'나중에', mn:'дараа', ex:'나중에 이야기해요.', exTranslation:'Дараа ярилцъя.'},
+      {kr:'주말', mn:'амралтын өдөр', ex:'주말에 쉬어요.', exTranslation:'Амралтын өдөр амардаг.'},
+      {kr:'지난주', mn:'өнгөрсөн долоо хоног', ex:'지난주에 바빴어요.', exTranslation:'Өнгөрсөн долоо хоногт завгүй байсан.'},
+      {kr:'다음주', mn:'ирэх долоо хоног', ex:'다음주에 만나요.', exTranslation:'Ирэх долоо хоногт уулзана.'},
+      {kr:'이번주', mn:'энэ долоо хоног', ex:'이번주는 바빠요.', exTranslation:'Энэ долоо хоног завгүй байна.'},
+      {kr:'지난달', mn:'өнгөрсөн сар', ex:'지난달에 갔어요.', exTranslation:'Өнгөрсөн сард явсан.'},
+      {kr:'다음달', mn:'ирэх сар', ex:'다음달에 시작해요.', exTranslation:'Ирэх сард эхэлнэ.'},
+      {kr:'올해', mn:'энэ жил', ex:'올해 스무 살이에요.', exTranslation:'Энэ жил 20 настай.'},
+      {kr:'작년', mn:'өнгөрсөн жил', ex:'작년에 결혼했어요.', exTranslation:'Өнгөрсөн жил гэрлэсэн.'},
+      {kr:'내년', mn:'ирэх жил', ex:'내년에 졸업해요.', exTranslation:'Ирэх жил төгсөнө.'},
+      {kr:'항상', mn:'үргэлж', ex:'항상 웃어요.', exTranslation:'Үргэлж инээмсэглэдэг.'},
+      {kr:'가끔', mn:'заримдаа', ex:'가끔 운동해요.', exTranslation:'Заримдаа дасгал хийдэг.'},
+    ]},
+    { topic:'Өдөр тутмын үйл үг', level:1, words:[
+      {kr:'가다', mn:'явах', ex:'학교에 가요.', exTranslation:'Сургууль руу явж байна.'},
+      {kr:'오다', mn:'ирэх', ex:'집에 와요.', exTranslation:'Гэртээ ирж байна.'},
+      {kr:'먹다', mn:'идэх', ex:'과일을 먹어요.', exTranslation:'Жимс идэж байна.'},
+      {kr:'마시다', mn:'уух', ex:'물을 마셔요.', exTranslation:'Ус ууж байна.'},
+      {kr:'자다', mn:'унтах', ex:'일찍 자요.', exTranslation:'Эрт унтдаг.'},
+      {kr:'일어나다', mn:'босох', ex:'일곱 시에 일어나요.', exTranslation:'7 цагт босдог.'},
+      {kr:'보다', mn:'үзэх/харах', ex:'영화를 봐요.', exTranslation:'Кино үзэж байна.'},
+      {kr:'듣다', mn:'сонсох', ex:'음악을 들어요.', exTranslation:'Хөгжим сонсож байна.'},
+      {kr:'말하다', mn:'ярих', ex:'한국어로 말해요.', exTranslation:'Солонгосоор ярьж байна.'},
+      {kr:'공부하다', mn:'сурах/суралцах', ex:'한국어를 공부해요.', exTranslation:'Солонгос хэл сурч байна.'},
+      {kr:'사다', mn:'худалдаж авах', ex:'옷을 사요.', exTranslation:'Хувцас худалдаж авч байна.'},
+      {kr:'팔다', mn:'зарах', ex:'집을 팔아요.', exTranslation:'Байшин зарж байна.'},
+      {kr:'만들다', mn:'хийх/бүтээх', ex:'음식을 만들어요.', exTranslation:'Хоол хийж байна.'},
+      {kr:'주다', mn:'өгөх', ex:'선물을 줘요.', exTranslation:'Бэлэг өгч байна.'},
+      {kr:'받다', mn:'авах', ex:'편지를 받아요.', exTranslation:'Захидал авч байна.'},
+      {kr:'일하다', mn:'ажиллах', ex:'회사에서 일해요.', exTranslation:'Компанид ажилладаг.'},
+      {kr:'쉬다', mn:'амрах', ex:'집에서 쉬어요.', exTranslation:'Гэртээ амарч байна.'},
+      {kr:'놀다', mn:'тоглох', ex:'친구랑 놀아요.', exTranslation:'Найзтайгаа тоглож байна.'},
+      {kr:'씻다', mn:'угаах', ex:'손을 씻어요.', exTranslation:'Гараа угааж байна.'},
+      {kr:'걷다', mn:'алхах', ex:'공원을 걸어요.', exTranslation:'Цэцэрлэгт хүрээлэнгээр алхаж байна.'},
+    ]},
+    { topic:'Газар, чиглэл', level:1, words:[
+      {kr:'집', mn:'гэр', ex:'집에 가요.', exTranslation:'Гэртээ явж байна.'},
+      {kr:'학교', mn:'сургууль', ex:'학교가 커요.', exTranslation:'Сургууль том.'},
+      {kr:'회사', mn:'компани/оффис', ex:'회사에서 일해요.', exTranslation:'Компанид ажилладаг.'},
+      {kr:'병원', mn:'эмнэлэг', ex:'병원에 가요.', exTranslation:'Эмнэлэг рүү явж байна.'},
+      {kr:'화장실', mn:'бие засах газар', ex:'화장실이 어디예요?', exTranslation:'Бие засах газар хаана байна?'},
+      {kr:'여기', mn:'энд', ex:'여기 앉으세요.', exTranslation:'Энд суугаарай.'},
+      {kr:'저기', mn:'тэнд', ex:'저기 있어요.', exTranslation:'Тэнд байна.'},
+      {kr:'왼쪽', mn:'зүүн тал', ex:'왼쪽으로 가세요.', exTranslation:'Зүүн тийш яваарай.'},
+      {kr:'오른쪽', mn:'баруун тал', ex:'오른쪽에 있어요.', exTranslation:'Баруун талд байна.'},
+      {kr:'어디예요', mn:'хаана вэ', ex:'지금 어디예요?', exTranslation:'Одоо хаана байна вэ?'},
+      {kr:'시장', mn:'зах', ex:'시장에서 사요.', exTranslation:'Захаас худалдаж авдаг.'},
+      {kr:'은행', mn:'банк', ex:'은행에 가요.', exTranslation:'Банк руу явж байна.'},
+      {kr:'공원', mn:'цэцэрлэгт хүрээлэн', ex:'공원에서 걸어요.', exTranslation:'Цэцэрлэгт хүрээлэнд алхаж байна.'},
+      {kr:'역', mn:'буудал (метро)', ex:'역에서 만나요.', exTranslation:'Буудал дээр уулзана.'},
+      {kr:'공항', mn:'нисэх онгоцны буудал', ex:'공항에 도착했어요.', exTranslation:'Нисэх буудалд ирлээ.'},
+      {kr:'앞', mn:'урд тал', ex:'학교 앞이에요.', exTranslation:'Сургуулийн урд байна.'},
+      {kr:'뒤', mn:'хойд тал', ex:'집 뒤에 있어요.', exTranslation:'Гэрийн ард байна.'},
+      {kr:'위', mn:'дээр тал', ex:'책상 위에 있어요.', exTranslation:'Ширээн дээр байна.'},
+      {kr:'아래', mn:'доод тал', ex:'침대 아래 있어요.', exTranslation:'Орны доор байна.'},
+      {kr:'근처', mn:'ойролцоо', ex:'집 근처예요.', exTranslation:'Гэрийн ойролцоо байна.'},
+    ]},
+    { topic:'Цаг агаар', level:1, words:[
+      {kr:'날씨', mn:'цаг агаар', ex:'오늘 날씨 좋아요.', exTranslation:'Өнөөдөр цаг агаар сайхан байна.'},
+      {kr:'맑아요', mn:'цэлмэг байна', ex:'하늘이 맑아요.', exTranslation:'Тэнгэр цэлмэг байна.'},
+      {kr:'흐려요', mn:'үүлэрхэг байна', ex:'날씨가 흐려요.', exTranslation:'Цаг агаар үүлэрхэг байна.'},
+      {kr:'비가 와요', mn:'бороо орж байна', ex:'지금 비가 와요.', exTranslation:'Одоо бороо орж байна.'},
+      {kr:'눈이 와요', mn:'цас орж байна', ex:'겨울에 눈이 와요.', exTranslation:'Өвөл цас ордог.'},
+      {kr:'더워요', mn:'халуун байна', ex:'여름은 더워요.', exTranslation:'Зун халуун байдаг.'},
+      {kr:'추워요', mn:'хүйтэн байна', ex:'겨울은 추워요.', exTranslation:'Өвөл хүйтэн байдаг.'},
+      {kr:'바람이 불어요', mn:'салхилж байна', ex:'바람이 많이 불어요.', exTranslation:'Их салхилж байна.'},
+      {kr:'따뜻해요', mn:'дулаахан байна', ex:'봄에 따뜻해요.', exTranslation:'Хавар дулаахан байдаг.'},
+      {kr:'시원해요', mn:'сэрүүн байна', ex:'가을은 시원해요.', exTranslation:'Намар сэрүүн байдаг.'},
+      {kr:'계절', mn:'улирал', ex:'무슨 계절을 좋아해요?', exTranslation:'Ямар улирал таалагддаг вэ?'},
+      {kr:'봄', mn:'хавар', ex:'봄이 왔어요.', exTranslation:'Хавар ирлээ.'},
+      {kr:'여름', mn:'зун', ex:'여름을 좋아해요.', exTranslation:'Зун таалагддаг.'},
+      {kr:'가을', mn:'намар', ex:'가을이 예뻐요.', exTranslation:'Намар үзэсгэлэнтэй.'},
+      {kr:'겨울', mn:'өвөл', ex:'겨울에 스키 타요.', exTranslation:'Өвөл цанаар гулгадаг.'},
+      {kr:'습해요', mn:'чийглэг байна', ex:'오늘은 습해요.', exTranslation:'Өнөөдөр чийглэг байна.'},
+      {kr:'건조해요', mn:'хуурай байна', ex:'날씨가 건조해요.', exTranslation:'Агаар хуурай байна.'},
+      {kr:'안개', mn:'манан', ex:'아침에 안개가 껴요.', exTranslation:'Өглөө манантай байна.'},
+      {kr:'태풍', mn:'шуурга', ex:'태풍이 와요.', exTranslation:'Шуурга ирж байна.'},
+      {kr:'우산', mn:'шүхэр', ex:'우산을 가져가세요.', exTranslation:'Шүхрээ аваарай.'},
+    ]},
+    { topic:'Мэдрэмж', level:1, words:[
+      {kr:'기뻐요', mn:'баяртай байна', ex:'저는 기뻐요.', exTranslation:'Би баяртай байна.'},
+      {kr:'슬퍼요', mn:'гунигтай байна', ex:'조금 슬퍼요.', exTranslation:'Жаахан гунигтай байна.'},
+      {kr:'화가 나요', mn:'уурлаж байна', ex:'정말 화가 나요.', exTranslation:'Үнэхээр уурлаж байна.'},
+      {kr:'무서워요', mn:'айж байна', ex:'저는 무서워요.', exTranslation:'Би айж байна.'},
+      {kr:'피곤해요', mn:'ядарсан байна', ex:'오늘 피곤해요.', exTranslation:'Өнөөдөр ядарсан байна.'},
+      {kr:'심심해요', mn:'уйтгартай байна', ex:'집에서 심심해요.', exTranslation:'Гэртээ уйтгартай байна.'},
+      {kr:'걱정돼요', mn:'санаа зовж байна', ex:'시험이 걱정돼요.', exTranslation:'Шалгалтаас санаа зовж байна.'},
+      {kr:'행복해요', mn:'аз жаргалтай байна', ex:'가족과 행복해요.', exTranslation:'Гэр бүлтэйгээ аз жаргалтай байна.'},
+      {kr:'신나요', mn:'сэтгэл хөдөлж байна', ex:'여행이 신나요.', exTranslation:'Аялал сэтгэл хөдөлгөм байна.'},
+      {kr:'놀랐어요', mn:'гайхсан', ex:'정말 놀랐어요.', exTranslation:'Үнэхээр гайхсан.'},
+      {kr:'편해요', mn:'тав тухтай байна', ex:'이 의자가 편해요.', exTranslation:'Энэ сандал тав тухтай.'},
+      {kr:'불편해요', mn:'таагүй байна', ex:'조금 불편해요.', exTranslation:'Жаахан таагүй байна.'},
+      {kr:'궁금해요', mn:'сонирхож байна', ex:'결과가 궁금해요.', exTranslation:'Үр дүн сонирхолтой байна.'},
+      {kr:'부끄러워요', mn:'ичиж байна', ex:'조금 부끄러워요.', exTranslation:'Жаахан ичиж байна.'},
+      {kr:'자신있어요', mn:'итгэлтэй байна', ex:'저는 자신있어요.', exTranslation:'Би итгэлтэй байна.'},
+      {kr:'외로워요', mn:'ганцаардаж байна', ex:'가끔 외로워요.', exTranslation:'Заримдаа ганцаардаж байна.'},
+      {kr:'짜증나요', mn:'бухимдаж байна', ex:'정말 짜증나요.', exTranslation:'Үнэхээр бухимдаж байна.'},
+      {kr:'감동받았어요', mn:'сэтгэл хөдлөв', ex:'영화에 감동받았어요.', exTranslation:'Киноноос сэтгэл хөдлөв.'},
+      {kr:'그리워요', mn:'санагдаж байна', ex:'가족이 그리워요.', exTranslation:'Гэр бүлээ санаж байна.'},
+      {kr:'재미있어요', mn:'сонирхолтой байна', ex:'이 책이 재미있어요.', exTranslation:'Энэ ном сонирхолтой байна.'},
+    ]},
+    { topic:'Хувцас, бие', level:1, words:[
+      {kr:'옷', mn:'хувцас', ex:'옷을 사요.', exTranslation:'Хувцас худалдаж авч байна.'},
+      {kr:'신발', mn:'гутал', ex:'신발이 예뻐요.', exTranslation:'Гутал гоё юм.'},
+      {kr:'모자', mn:'малгай', ex:'모자를 써요.', exTranslation:'Малгай өмсдөг.'},
+      {kr:'가방', mn:'цүнх', ex:'가방이 무거워요.', exTranslation:'Цүнх хүнд байна.'},
+      {kr:'안경', mn:'нүдний шил', ex:'안경을 써요.', exTranslation:'Нүдний шил зүүдэг.'},
+      {kr:'시계', mn:'гар цаг', ex:'시계가 멋있어요.', exTranslation:'Гар цаг сайхан юм.'},
+      {kr:'머리', mn:'толгой/үс', ex:'머리가 아파요.', exTranslation:'Толгой өвдөж байна.'},
+      {kr:'눈', mn:'нүд', ex:'눈이 예뻐요.', exTranslation:'Нүд нь гоё.'},
+      {kr:'코', mn:'хамар', ex:'코가 높아요.', exTranslation:'Хамар нь өндөр.'},
+      {kr:'입', mn:'ам', ex:'입이 작아요.', exTranslation:'Ам нь жижиг.'},
+      {kr:'귀', mn:'чих', ex:'귀가 아파요.', exTranslation:'Чих өвдөж байна.'},
+      {kr:'손', mn:'гар', ex:'손을 씻어요.', exTranslation:'Гараа угааж байна.'},
+      {kr:'발', mn:'хөл', ex:'발이 아파요.', exTranslation:'Хөл өвдөж байна.'},
+      {kr:'배', mn:'гэдэс', ex:'배가 아파요.', exTranslation:'Гэдэс өвдөж байна.'},
+      {kr:'목', mn:'хүзүү', ex:'목이 아파요.', exTranslation:'Хүзүү өвдөж байна.'},
+      {kr:'아파요', mn:'өвдөж байна', ex:'많이 아파요.', exTranslation:'Их өвдөж байна.'},
+      {kr:'키가 커요', mn:'өндөр биетэй', ex:'그는 키가 커요.', exTranslation:'Тэр өндөр биетэй.'},
+      {kr:'예뻐요', mn:'гоо сайхан', ex:'꽃이 예뻐요.', exTranslation:'Цэцэг гоё юм.'},
+      {kr:'잘생겼어요', mn:'царайлаг (эрэгтэй)', ex:'그 배우는 잘생겼어요.', exTranslation:'Тэр жүжигчин царайлаг.'},
+      {kr:'귀여워요', mn:'хөөрхөн', ex:'강아지가 귀여워요.', exTranslation:'Нохой хөөрхөн байна.'},
+    ]},
+    { topic:'Тээвэр', level:1, words:[
+      {kr:'버스', mn:'автобус', ex:'버스를 타요.', exTranslation:'Автобусанд суудаг.'},
+      {kr:'지하철', mn:'метро', ex:'지하철이 빨라요.', exTranslation:'Метро хурдан.'},
+      {kr:'택시', mn:'такси', ex:'택시를 불러요.', exTranslation:'Такси дуудаж байна.'},
+      {kr:'기차', mn:'галт тэрэг', ex:'기차를 타요.', exTranslation:'Галт тэрэгэнд суудаг.'},
+      {kr:'비행기', mn:'онгоц', ex:'비행기가 늦었어요.', exTranslation:'Онгоц хоцорсон.'},
+      {kr:'자동차', mn:'машин', ex:'자동차가 있어요.', exTranslation:'Машинтай.'},
+      {kr:'자전거', mn:'унадаг дугуй', ex:'자전거를 타요.', exTranslation:'Унадаг дугуй унадаг.'},
+      {kr:'표', mn:'тасалбар', ex:'표를 사요.', exTranslation:'Тасалбар авч байна.'},
+      {kr:'정류장', mn:'зогсоол', ex:'정류장에서 기다려요.', exTranslation:'Зогсоол дээр хүлээж байна.'},
+      {kr:'출발하다', mn:'хөдлөх', ex:'지금 출발해요.', exTranslation:'Одоо хөдөлж байна.'},
+      {kr:'도착하다', mn:'хүрэх/ирэх', ex:'곧 도착해요.', exTranslation:'Удахгүй хүрнэ.'},
+      {kr:'갈아타다', mn:'шилжих', ex:'버스를 갈아타요.', exTranslation:'Автобус шилжинэ.'},
+      {kr:'요금', mn:'хураамж', ex:'요금이 얼마예요?', exTranslation:'Хураамж хэд вэ?'},
+      {kr:'길이 막혀요', mn:'зам түгжрэлтэй', ex:'길이 많이 막혀요.', exTranslation:'Зам их түгжрэлтэй байна.'},
+      {kr:'빠르다', mn:'хурдан', ex:'기차가 빨라요.', exTranslation:'Галт тэрэг хурдан.'},
+      {kr:'느리다', mn:'удаан', ex:'버스가 느려요.', exTranslation:'Автобус удаан.'},
+      {kr:'걸어서', mn:'явганаар', ex:'걸어서 가요.', exTranslation:'Явганаар явж байна.'},
+      {kr:'얼마나 걸려요', mn:'хэр удаан явна вэ', ex:'시간이 얼마나 걸려요?', exTranslation:'Хэр удаан явна вэ?'},
+      {kr:'편도', mn:'нэг талын', ex:'편도 표예요.', exTranslation:'Нэг талын тасалбар.'},
+      {kr:'왕복', mn:'хоёр талын', ex:'왕복으로 주세요.', exTranslation:'Хоёр талыг нь өгөөч.'},
+    ]},
+    { topic:'Дэлгүүр хийх, мөнгө', level:1, words:[
+      {kr:'가게', mn:'дэлгүүр', ex:'가게에 가요.', exTranslation:'Дэлгүүр рүү явж байна.'},
+      {kr:'백화점', mn:'их дэлгүүр', ex:'백화점에서 사요.', exTranslation:'Их дэлгүүрээс авдаг.'},
+      {kr:'편의점', mn:'жижиг дэлгүүр', ex:'편의점이 가까워요.', exTranslation:'Жижиг дэлгүүр ойрхон.'},
+      {kr:'돈', mn:'мөнгө', ex:'돈이 없어요.', exTranslation:'Мөнгө байхгүй.'},
+      {kr:'가격', mn:'үнэ', ex:'가격이 비싸요.', exTranslation:'Үнэ өндөр байна.'},
+      {kr:'싸다', mn:'хямд', ex:'이게 싸요.', exTranslation:'Энэ хямд.'},
+      {kr:'비싸다', mn:'үнэтэй', ex:'저게 비싸요.', exTranslation:'Тэр үнэтэй.'},
+      {kr:'할인', mn:'хямдрал', ex:'할인 중이에요.', exTranslation:'Хямдралтай байна.'},
+      {kr:'계산하다', mn:'төлөх', ex:'같이 계산해요.', exTranslation:'Хамт төлье.'},
+      {kr:'신용카드', mn:'зээлийн карт', ex:'신용카드로 낼게요.', exTranslation:'Зээлийн картаар төлье.'},
+      {kr:'현금', mn:'бэлэн мөнгө', ex:'현금이 있어요?', exTranslation:'Бэлэн мөнгөтэй юу?'},
+      {kr:'영수증', mn:'баримт', ex:'영수증 주세요.', exTranslation:'Баримт өгөөч.'},
+      {kr:'교환하다', mn:'солих', ex:'이거 교환해 주세요.', exTranslation:'Үүнийг сольж өгөөч.'},
+      {kr:'환불하다', mn:'буцаан олгох', ex:'환불해 주세요.', exTranslation:'Мөнгийг буцааж өгөөч.'},
+      {kr:'사이즈', mn:'хэмжээ', ex:'사이즈가 커요.', exTranslation:'Хэмжээ том байна.'},
+      {kr:'색깔', mn:'өнгө', ex:'무슨 색깔이에요?', exTranslation:'Ямар өнгөтэй вэ?'},
+      {kr:'마음에 들어요', mn:'таалагдаж байна', ex:'이게 마음에 들어요.', exTranslation:'Энэ таалагдаж байна.'},
+      {kr:'입어보다', mn:'өмсөж үзэх', ex:'입어봐도 돼요?', exTranslation:'Өмсөж үзэж болох уу?'},
+      {kr:'포장하다', mn:'боох', ex:'포장해 주세요.', exTranslation:'Боож өгөөч.'},
+      {kr:'세일', mn:'хямдралын үйл ажиллагаа', ex:'세일 기간이에요.', exTranslation:'Хямдралын үе байна.'},
+    ]},
+    { topic:'Спорт, дасгал', level:1, words:[
+      {kr:'운동하다', mn:'дасгал хийх', ex:'매일 운동해요.', exTranslation:'Өдөр бүр дасгал хийдэг.'},
+      {kr:'축구', mn:'хөлбөмбөг', ex:'축구를 좋아해요.', exTranslation:'Хөлбөмбөг таалагддаг.'},
+      {kr:'야구', mn:'бейсбол', ex:'야구를 봐요.', exTranslation:'Бейсбол үзэж байна.'},
+      {kr:'농구', mn:'сагсан бөмбөг', ex:'농구를 해요.', exTranslation:'Сагсан бөмбөг тоглодог.'},
+      {kr:'수영하다', mn:'усанд сэлэх', ex:'수영을 잘해요.', exTranslation:'Усанд сайн сэлдэг.'},
+      {kr:'달리다', mn:'гүйх', ex:'아침에 달려요.', exTranslation:'Өглөө гүйдэг.'},
+      {kr:'요가', mn:'йога', ex:'요가를 배워요.', exTranslation:'Йога сурч байна.'},
+      {kr:'헬스장', mn:'фитнес заал', ex:'헬스장에 가요.', exTranslation:'Фитнес заал руу явж байна.'},
+      {kr:'등산하다', mn:'уулын аялал хийх', ex:'주말에 등산해요.', exTranslation:'Амралтын өдөр уулын аялал хийдэг.'},
+      {kr:'스키', mn:'цана', ex:'스키를 타요.', exTranslation:'Цанаар гулгадаг.'},
+      {kr:'자전거를 타다', mn:'унадаг дугуй унах', ex:'자전거를 타요.', exTranslation:'Унадаг дугуй унадаг.'},
+      {kr:'경기', mn:'тэмцээн', ex:'경기가 있어요.', exTranslation:'Тэмцээн байна.'},
+      {kr:'이기다', mn:'ялах', ex:'우리 팀이 이겼어요.', exTranslation:'Манай баг яллаа.'},
+      {kr:'지다', mn:'хожигдох', ex:'경기에서 졌어요.', exTranslation:'Тэмцээнд хожигдсон.'},
+      {kr:'팀', mn:'баг', ex:'우리 팀이에요.', exTranslation:'Манай баг.'},
+      {kr:'선수', mn:'тамирчин', ex:'유명한 선수예요.', exTranslation:'Алдартай тамирчин.'},
+      {kr:'건강', mn:'эрүүл мэнд', ex:'건강이 좋아요.', exTranslation:'Эрүүл мэнд сайн.'},
+      {kr:'힘들다', mn:'хэцүү/ядраатай', ex:'운동이 힘들어요.', exTranslation:'Дасгал ядраатай байна.'},
+      {kr:'쉬다', mn:'амрах', ex:'좀 쉬어요.', exTranslation:'Жаахан амарья.'},
+      {kr:'재미있어요', mn:'сонирхолтой', ex:'축구가 재미있어요.', exTranslation:'Хөлбөмбөг сонирхолтой.'},
+    ]},
+    { topic:'Байгаль орчин', level:1, words:[
+      {kr:'자연', mn:'байгаль', ex:'자연이 아름다워요.', exTranslation:'Байгаль үзэсгэлэнтэй.'},
+      {kr:'산', mn:'уул', ex:'산에 가요.', exTranslation:'Уул руу явж байна.'},
+      {kr:'바다', mn:'далай', ex:'바다를 좋아해요.', exTranslation:'Далай таалагддаг.'},
+      {kr:'강', mn:'гол', ex:'강이 커요.', exTranslation:'Гол том.'},
+      {kr:'나무', mn:'мод', ex:'나무가 많아요.', exTranslation:'Мод их байна.'},
+      {kr:'꽃', mn:'цэцэг', ex:'꽃이 예뻐요.', exTranslation:'Цэцэг гоё юм.'},
+      {kr:'하늘', mn:'тэнгэр', ex:'하늘이 파래요.', exTranslation:'Тэнгэр цэнхэр байна.'},
+      {kr:'동물', mn:'амьтан', ex:'동물을 좋아해요.', exTranslation:'Амьтан таалагддаг.'},
+      {kr:'식물', mn:'ургамал', ex:'식물을 키워요.', exTranslation:'Ургамал тарьдаг.'},
+      {kr:'공기', mn:'агаар', ex:'공기가 맑아요.', exTranslation:'Агаар цэвэр.'},
+      {kr:'오염', mn:'бохирдол', ex:'오염이 심해요.', exTranslation:'Бохирдол хүчтэй байна.'},
+      {kr:'재활용하다', mn:'дахин боловсруулах', ex:'재활용을 해요.', exTranslation:'Дахин боловсруулж байна.'},
+      {kr:'쓰레기', mn:'хог', ex:'쓰레기를 버려요.', exTranslation:'Хог хаяж байна.'},
+      {kr:'아름답다', mn:'үзэсгэлэнтэй', ex:'경치가 아름다워요.', exTranslation:'Үзэмж үзэсгэлэнтэй.'},
+      {kr:'조용하다', mn:'тайван/чимээгүй', ex:'여기가 조용해요.', exTranslation:'Энд тайван байна.'},
+      {kr:'시끄럽다', mn:'шуугиантай', ex:'도시가 시끄러워요.', exTranslation:'Хот шуугиантай.'},
+      {kr:'깨끗하다', mn:'цэвэр', ex:'물이 깨끗해요.', exTranslation:'Ус цэвэр.'},
+      {kr:'더럽다', mn:'бохир', ex:'거리가 더러워요.', exTranslation:'Гудамж бохир байна.'},
+      {kr:'보호하다', mn:'хамгаалах', ex:'환경을 보호해요.', exTranslation:'Орчноо хамгаалдаг.'},
+      {kr:'계절', mn:'улирал', ex:'좋아하는 계절이에요.', exTranslation:'Дуртай улирал.'},
+    ]},
+    { topic:'Технологи, утас', level:1, words:[
+      {kr:'휴대폰', mn:'гар утас', ex:'휴대폰이 있어요.', exTranslation:'Гар утастай.'},
+      {kr:'컴퓨터', mn:'компьютер', ex:'컴퓨터로 일해요.', exTranslation:'Компьютероор ажилладаг.'},
+      {kr:'인터넷', mn:'интернет', ex:'인터넷을 해요.', exTranslation:'Интернет ашиглаж байна.'},
+      {kr:'이메일', mn:'имэйл', ex:'이메일을 보내요.', exTranslation:'Имэйл илгээж байна.'},
+      {kr:'사진', mn:'зураг', ex:'사진을 찍어요.', exTranslation:'Зураг авч байна.'},
+      {kr:'전화하다', mn:'утасдах', ex:'친구에게 전화해요.', exTranslation:'Найздаа утасдаж байна.'},
+      {kr:'문자', mn:'мессеж', ex:'문자를 보내요.', exTranslation:'Мессеж илгээж байна.'},
+      {kr:'앱', mn:'апп', ex:'앱을 써요.', exTranslation:'Апп ашигладаг.'},
+      {kr:'다운로드하다', mn:'татах', ex:'앱을 다운로드해요.', exTranslation:'Апп татаж байна.'},
+      {kr:'충전하다', mn:'цэнэглэх', ex:'휴대폰을 충전해요.', exTranslation:'Утсаа цэнэглэж байна.'},
+      {kr:'배터리', mn:'батарей', ex:'배터리가 없어요.', exTranslation:'Батарей байхгүй.'},
+      {kr:'화면', mn:'дэлгэц', ex:'화면이 커요.', exTranslation:'Дэлгэц том.'},
+      {kr:'켜다', mn:'асаах', ex:'컴퓨터를 켜요.', exTranslation:'Компьютер асааж байна.'},
+      {kr:'끄다', mn:'унтраах', ex:'전화를 꺼요.', exTranslation:'Утсаа унтраах.'},
+      {kr:'고장나다', mn:'эвдрэх', ex:'휴대폰이 고장났어요.', exTranslation:'Утас эвдэрчихлээ.'},
+      {kr:'검색하다', mn:'хайх', ex:'인터넷에서 검색해요.', exTranslation:'Интернетээс хайж байна.'},
+      {kr:'저장하다', mn:'хадгалах', ex:'파일을 저장해요.', exTranslation:'Файлаа хадгалж байна.'},
+      {kr:'비밀번호', mn:'нууц үг', ex:'비밀번호를 잊었어요.', exTranslation:'Нууц үгээ мартчихлаа.'},
+      {kr:'와이파이', mn:'вайфай', ex:'와이파이가 안 돼요.', exTranslation:'Вайфай ажиллахгүй байна.'},
+      {kr:'업데이트하다', mn:'шинэчлэх', ex:'앱을 업데이트해요.', exTranslation:'Апп шинэчилж байна.'},
+    ]},
+    { topic:'Эрүүл мэнд', level:1, words:[
+      {kr:'아프다', mn:'өвдөх', ex:'배가 아파요.', exTranslation:'Гэдэс өвдөж байна.'},
+      {kr:'병', mn:'өвчин', ex:'무슨 병이에요?', exTranslation:'Ямар өвчин вэ?'},
+      {kr:'감기', mn:'ханиад', ex:'감기에 걸렸어요.', exTranslation:'Ханиад хүрсэн.'},
+      {kr:'열', mn:'халуурах', ex:'열이 나요.', exTranslation:'Халуурч байна.'},
+      {kr:'기침하다', mn:'ханиалгах', ex:'기침을 해요.', exTranslation:'Ханиалгаж байна.'},
+      {kr:'약', mn:'эм', ex:'약을 먹어요.', exTranslation:'Эм уугаад байна.'},
+      {kr:'약국', mn:'эмийн сан', ex:'약국에 가요.', exTranslation:'Эмийн сан руу явж байна.'},
+      {kr:'의사', mn:'эмч', ex:'의사를 만나요.', exTranslation:'Эмчтэй уулзаж байна.'},
+      {kr:'간호사', mn:'сувилагч', ex:'간호사가 친절해요.', exTranslation:'Сувилагч эелдэг.'},
+      {kr:'주사', mn:'тарилга', ex:'주사를 맞아요.', exTranslation:'Тариа тарьж байна.'},
+      {kr:'다치다', mn:'гэмтэх', ex:'다리를 다쳤어요.', exTranslation:'Хөлөө гэмтээсэн.'},
+      {kr:'낫다', mn:'эдгэрэх', ex:'빨리 나으세요.', exTranslation:'Хурдан эдгээрэй.'},
+      {kr:'건강하다', mn:'эрүүл байх', ex:'건강하게 사세요.', exTranslation:'Эрүүл саруул амьдраарай.'},
+      {kr:'피곤하다', mn:'ядрах', ex:'요즘 피곤해요.', exTranslation:'Сүүлийн үед ядарч байна.'},
+      {kr:'쉬어야 해요', mn:'амрах хэрэгтэй', ex:'좀 쉬어야 해요.', exTranslation:'Жаахан амрах хэрэгтэй.'},
+      {kr:'병원에 가다', mn:'эмнэлэгт очих', ex:'병원에 가야 해요.', exTranslation:'Эмнэлэгт очих хэрэгтэй.'},
+      {kr:'보험', mn:'даатгал', ex:'보험이 있어요?', exTranslation:'Даатгалтай юу?'},
+      {kr:'알레르기', mn:'харшил', ex:'알레르기가 있어요.', exTranslation:'Харшилтай.'},
+      {kr:'두통', mn:'толгой өвдөх', ex:'두통이 있어요.', exTranslation:'Толгой өвдөж байна.'},
+      {kr:'응급실', mn:'яаралтай тусламж', ex:'응급실로 가요.', exTranslation:'Яаралтай тусламжийн өрөө рүү явж байна.'},
+    ]},
+    { topic:'Зочид буудал, аялал', level:1, words:[
+      {kr:'여행하다', mn:'аялах', ex:'여행을 좋아해요.', exTranslation:'Аялах дуртай.'},
+      {kr:'호텔', mn:'зочид буудал', ex:'호텔에 묵어요.', exTranslation:'Зочид буудалд буусан.'},
+      {kr:'예약하다', mn:'захиалга хийх', ex:'방을 예약해요.', exTranslation:'Өрөө захиалж байна.'},
+      {kr:'여권', mn:'паспорт', ex:'여권을 보여 주세요.', exTranslation:'Паспортоо үзүүлээрэй.'},
+      {kr:'비자', mn:'виз', ex:'비자가 필요해요.', exTranslation:'Виз хэрэгтэй.'},
+      {kr:'짐', mn:'ачаа', ex:'짐이 많아요.', exTranslation:'Ачаа их байна.'},
+      {kr:'관광하다', mn:'аялал жуулчлал хийх', ex:'서울을 관광해요.', exTranslation:'Сөүлд аялал хийж байна.'},
+      {kr:'기념품', mn:'дурсгалын зүйл', ex:'기념품을 사요.', exTranslation:'Дурсгалын зүйл авч байна.'},
+      {kr:'관광지', mn:'үзмэр газар', ex:'유명한 관광지예요.', exTranslation:'Алдартай үзмэр газар.'},
+      {kr:'숙소', mn:'байр', ex:'숙소를 찾아요.', exTranslation:'Байр хайж байна.'},
+      {kr:'안내소', mn:'мэдээллийн төв', ex:'안내소가 어디예요?', exTranslation:'Мэдээллийн төв хаана байна?'},
+      {kr:'지도', mn:'газрын зураг', ex:'지도를 봐요.', exTranslation:'Газрын зураг харж байна.'},
+      {kr:'길을 잃다', mn:'төөрөх', ex:'길을 잃었어요.', exTranslation:'Замаа алдчихлаа.'},
+      {kr:'추천하다', mn:'санал болгох', ex:'식당을 추천해 주세요.', exTranslation:'Зоогийн газар санал болгоорой.'},
+      {kr:'유명하다', mn:'алдартай', ex:'여기가 유명해요.', exTranslation:'Энд алдартай.'},
+      {kr:'경치', mn:'үзэмж', ex:'경치가 좋아요.', exTranslation:'Үзэмж сайхан.'},
+      {kr:'즐겁다', mn:'хөгжилтэй байх', ex:'여행이 즐거워요.', exTranslation:'Аялал хөгжилтэй байна.'},
+      {kr:'체크인', mn:'бүртгэл (check-in)', ex:'체크인은 몇 시예요?', exTranslation:'Check-in хэдэн цагт вэ?'},
+      {kr:'체크아웃', mn:'гарах бүртгэл', ex:'체크아웃은 열두 시예요.', exTranslation:'Check-out 12 цагт.'},
+      {kr:'출입국', mn:'нэвтрэлтийн газар', ex:'출입국 관리소예요.', exTranslation:'Нэвтрэлтийн хяналтын газар.'},
+    ]},
+    { topic:'Сургууль, боловсрол', level:1, words:[
+      {kr:'학생', mn:'сурагч/оюутан', ex:'저는 학생이에요.', exTranslation:'Би сурагч.'},
+      {kr:'선생님', mn:'багш', ex:'선생님이 친절해요.', exTranslation:'Багш эелдэг.'},
+      {kr:'교실', mn:'анги танхим', ex:'교실이 커요.', exTranslation:'Анги том.'},
+      {kr:'수업', mn:'хичээл', ex:'수업이 재미있어요.', exTranslation:'Хичээл сонирхолтой.'},
+      {kr:'숙제', mn:'гэрийн даалгавар', ex:'숙제를 해요.', exTranslation:'Даалгавраа хийж байна.'},
+      {kr:'시험', mn:'шалгалт', ex:'시험이 있어요.', exTranslation:'Шалгалт байна.'},
+      {kr:'성적', mn:'дүн', ex:'성적이 좋아요.', exTranslation:'Дүн сайн.'},
+      {kr:'졸업하다', mn:'төгсөх', ex:'내년에 졸업해요.', exTranslation:'Ирэх жил төгсдөг.'},
+      {kr:'입학하다', mn:'элсэх', ex:'대학교에 입학했어요.', exTranslation:'Их сургуульд элссэн.'},
+      {kr:'전공', mn:'мэргэжил', ex:'전공이 뭐예요?', exTranslation:'Мэргэжил чинь юу вэ?'},
+      {kr:'대학교', mn:'их сургууль', ex:'대학교에 다녀요.', exTranslation:'Их сургуульд явдаг.'},
+      {kr:'도서관', mn:'номын сан', ex:'도서관에서 공부해요.', exTranslation:'Номын санд сурдаг.'},
+      {kr:'책', mn:'ном', ex:'책을 읽어요.', exTranslation:'Ном уншиж байна.'},
+      {kr:'노트', mn:'тэмдэглэлийн дэвтэр', ex:'노트에 써요.', exTranslation:'Дэвтэртээ бичиж байна.'},
+      {kr:'연필', mn:'харандаа', ex:'연필로 써요.', exTranslation:'Харандаагаар бичдэг.'},
+      {kr:'질문하다', mn:'асуух', ex:'선생님께 질문해요.', exTranslation:'Багшаасаа асууж байна.'},
+      {kr:'대답하다', mn:'хариулах', ex:'질문에 대답해요.', exTranslation:'Асуултад хариулж байна.'},
+      {kr:'이해하다', mn:'ойлгох', ex:'잘 이해했어요.', exTranslation:'Сайн ойлгосон.'},
+      {kr:'배우다', mn:'сурах', ex:'한국어를 배워요.', exTranslation:'Солонгос хэл сурдаг.'},
+      {kr:'가르치다', mn:'заах', ex:'영어를 가르쳐요.', exTranslation:'Англи хэл зааж байна.'},
+    ]},
+    { topic:'Найз нөхөд, харилцаа', level:1, words:[
+      {kr:'친구', mn:'найз', ex:'친구를 만나요.', exTranslation:'Найзтайгаа уулзаж байна.'},
+      {kr:'남자친구', mn:'найз залуу', ex:'남자친구가 있어요.', exTranslation:'Найз залуутай.'},
+      {kr:'여자친구', mn:'найз охин', ex:'여자친구가 예뻐요.', exTranslation:'Найз охин гоо сайхан.'},
+      {kr:'만나다', mn:'уулзах', ex:'내일 만나요.', exTranslation:'Маргааш уулзана.'},
+      {kr:'사귀다', mn:'найзалж явах', ex:'그들은 사귀어요.', exTranslation:'Тэд найзалж явдаг.'},
+      {kr:'소개하다', mn:'танилцуулах', ex:'친구를 소개해요.', exTranslation:'Найзаа танилцуулж байна.'},
+      {kr:'초대하다', mn:'урих', ex:'생일에 초대해요.', exTranslation:'Төрсөн өдөртөө урьж байна.'},
+      {kr:'약속', mn:'тохироо', ex:'약속이 있어요.', exTranslation:'Тохироотой байна.'},
+      {kr:'관계', mn:'харилцаа', ex:'관계가 좋아요.', exTranslation:'Харилцаа сайн.'},
+      {kr:'믿다', mn:'итгэх', ex:'친구를 믿어요.', exTranslation:'Найздаа итгэдэг.'},
+      {kr:'배려하다', mn:'анхаарал тавих', ex:'서로 배려해요.', exTranslation:'Бие биедээ анхаарал тавьдаг.'},
+      {kr:'싸우다', mn:'хэрэлдэх', ex:'친구랑 싸웠어요.', exTranslation:'Найзтайгаа хэрэлдсэн.'},
+      {kr:'화해하다', mn:'эвлэрэх', ex:'우리는 화해했어요.', exTranslation:'Бид эвлэрсэн.'},
+      {kr:'오해하다', mn:'буруу ойлгох', ex:'저를 오해했어요.', exTranslation:'Намайг буруу ойлгосон.'},
+      {kr:'연락하다', mn:'холбоо барих', ex:'자주 연락해요.', exTranslation:'Байнга холбоо барьдаг.'},
+      {kr:'도와주다', mn:'тусалж өгөх', ex:'저를 도와줬어요.', exTranslation:'Надад тусалсан.'},
+      {kr:'고맙다', mn:'талархах', ex:'정말 고마워요.', exTranslation:'Үнэхээр талархаж байна.'},
+      {kr:'친하다', mn:'дотно байх', ex:'우리는 친해요.', exTranslation:'Бид дотно.'},
+      {kr:'헤어지다', mn:'салах', ex:'남자친구랑 헤어졌어요.', exTranslation:'Найз залуутайгаа салсан.'},
+      {kr:'그리워하다', mn:'санагдах', ex:'친구를 그리워해요.', exTranslation:'Найзаа санаж байна.'},
+    ]},
+    { topic:'Гэр, тавилга', level:1, words:[
+      {kr:'방', mn:'өрөө', ex:'방이 작아요.', exTranslation:'Өрөө жижиг.'},
+      {kr:'침대', mn:'ор', ex:'침대에서 자요.', exTranslation:'Ор дээр унтдаг.'},
+      {kr:'책상', mn:'ширээ', ex:'책상 위에 있어요.', exTranslation:'Ширээн дээр байна.'},
+      {kr:'의자', mn:'сандал', ex:'의자에 앉아요.', exTranslation:'Сандал дээр суудаг.'},
+      {kr:'소파', mn:'буйдан', ex:'소파에서 쉬어요.', exTranslation:'Буйдан дээр амардаг.'},
+      {kr:'냉장고', mn:'хөргөгч', ex:'냉장고에 있어요.', exTranslation:'Хөргөгчинд байна.'},
+      {kr:'세탁기', mn:'угаалгын машин', ex:'세탁기를 돌려요.', exTranslation:'Угаалгын машин ажиллуулж байна.'},
+      {kr:'텔레비전', mn:'телевизор', ex:'텔레비전을 봐요.', exTranslation:'Телевиз үзэж байна.'},
+      {kr:'부엌', mn:'гал тогоо', ex:'부엌에서 요리해요.', exTranslation:'Гал тогооны өрөөнд хоол хийдэг.'},
+      {kr:'거실', mn:'зочны өрөө', ex:'거실이 넓어요.', exTranslation:'Зочны өрөө өргөн.'},
+      {kr:'창문', mn:'цонх', ex:'창문을 열어요.', exTranslation:'Цонхоо онгойлгож байна.'},
+      {kr:'문', mn:'хаалга', ex:'문을 닫아요.', exTranslation:'Хаалгаа хааж байна.'},
+      {kr:'벽', mn:'хана', ex:'벽에 그림이 있어요.', exTranslation:'Ханан дээр зураг байна.'},
+      {kr:'이사하다', mn:'нүүх', ex:'다음 달에 이사해요.', exTranslation:'Ирэх сард нүүнэ.'},
+      {kr:'월세', mn:'түрээс', ex:'월세가 비싸요.', exTranslation:'Түрээс өндөр.'},
+      {kr:'아파트', mn:'орон сууц', ex:'아파트에 살아요.', exTranslation:'Орон сууцанд амьдардаг.'},
+      {kr:'청소하다', mn:'цэвэрлэх', ex:'방을 청소해요.', exTranslation:'Өрөөгөө цэвэрлэж байна.'},
+      {kr:'정리하다', mn:'цэгцлэх', ex:'책상을 정리해요.', exTranslation:'Ширээгээ цэгцэлж байна.'},
+      {kr:'편하다', mn:'тав тухтай', ex:'집이 편해요.', exTranslation:'Гэр тав тухтай.'},
+      {kr:'넓다', mn:'өргөн', ex:'방이 넓어요.', exTranslation:'Өрөө өргөн.'},
+    ]},
+    { topic:'Ажил, өдөр тутмын идэвх', level:2, words:[
+      {kr:'회의', mn:'хурал', ex:'회의가 있어요.', exTranslation:'Хурал байна.'},
+      {kr:'출근하다', mn:'ажилдаа явах', ex:'아침에 출근해요.', exTranslation:'Өглөө ажилдаа явдаг.'},
+      {kr:'퇴근하다', mn:'ажлаас гарах', ex:'저녁에 퇴근해요.', exTranslation:'Оройд ажлаас гардаг.'},
+      {kr:'회사원', mn:'ажилтан', ex:'저는 회사원이에요.', exTranslation:'Би компанийн ажилтан.'},
+      {kr:'월급', mn:'цалин', ex:'월급을 받았어요.', exTranslation:'Цалингаа авлаа.'},
+      {kr:'스트레스', mn:'стресс', ex:'스트레스가 많아요.', exTranslation:'Стресс их байна.'},
+      {kr:'계획', mn:'төлөвлөгөө', ex:'계획을 세워요.', exTranslation:'Төлөвлөгөө гаргаж байна.'},
+      {kr:'준비하다', mn:'бэлтгэх', ex:'시험을 준비해요.', exTranslation:'Шалгалтаа бэлдэж байна.'},
+      {kr:'결정하다', mn:'шийдвэрлэх', ex:'빨리 결정해요.', exTranslation:'Хурдан шийднэ.'},
+      {kr:'문제', mn:'асуудал', ex:'문제가 있어요.', exTranslation:'Асуудал байна.'},
+      {kr:'해결하다', mn:'шийдэх', ex:'문제를 해결해요.', exTranslation:'Асуудлыг шийдэж байна.'},
+      {kr:'경험', mn:'туршлага', ex:'좋은 경험이었어요.', exTranslation:'Сайхан туршлага байлаа.'},
+      {kr:'기회', mn:'боломж', ex:'좋은 기회예요.', exTranslation:'Сайн боломж.'},
+      {kr:'목표', mn:'зорилго', ex:'목표를 세워요.', exTranslation:'Зорилго тавьж байна.'},
+      {kr:'성공하다', mn:'амжилтанд хүрэх', ex:'사업에 성공했어요.', exTranslation:'Бизнестээ амжилтанд хүрсэн.'},
+      {kr:'실패하다', mn:'бүтэлгүйтэх', ex:'시험에 실패했어요.', exTranslation:'Шалгалтандаа бүтэлгүйтсэн.'},
+      {kr:'발전하다', mn:'хөгжих', ex:'실력이 발전해요.', exTranslation:'Чадвар хөгжиж байна.'},
+      {kr:'협력하다', mn:'хамтран ажиллах', ex:'함께 협력해요.', exTranslation:'Хамтран ажилладаг.'},
+      {kr:'책임', mn:'хариуцлага', ex:'책임을 져요.', exTranslation:'Хариуцлага хүлээдэг.'},
+      {kr:'능력', mn:'чадвар', ex:'능력이 좋아요.', exTranslation:'Чадвар сайн.'},
+    ]},
+    { topic:'Ажил хайх, ярилцлага', level:2, words:[
+      {kr:'이력서', mn:'анкет', ex:'이력서를 써요.', exTranslation:'Анкет бичиж байна.'},
+      {kr:'면접', mn:'ярилцлага', ex:'면접을 봐요.', exTranslation:'Ярилцлагад орж байна.'},
+      {kr:'지원하다', mn:'өргөдөл гаргах', ex:'회사에 지원해요.', exTranslation:'Компанид өргөдөл гаргаж байна.'},
+      {kr:'채용하다', mn:'ажилд авах', ex:'신입을 채용해요.', exTranslation:'Шинэ ажилтан авч байна.'},
+      {kr:'경력', mn:'туршлага', ex:'경력이 있어요.', exTranslation:'Туршлагатай.'},
+      {kr:'자격증', mn:'гэрчилгээ', ex:'자격증이 있어요.', exTranslation:'Гэрчилгээтэй.'},
+      {kr:'급여', mn:'цалин хөлс', ex:'급여가 많아요.', exTranslation:'Цалин их байна.'},
+      {kr:'계약하다', mn:'гэрээ байгуулах', ex:'계약을 했어요.', exTranslation:'Гэрээ байгуулсан.'},
+      {kr:'승진하다', mn:'албан тушаал ахих', ex:'이번에 승진했어요.', exTranslation:'Энэ удаа ахисан.'},
+      {kr:'퇴사하다', mn:'ажлаас гарах', ex:'회사를 퇴사해요.', exTranslation:'Компаниас гарч байна.'},
+      {kr:'동료', mn:'хамт олон', ex:'동료들이 좋아요.', exTranslation:'Хамт олон сайн.'},
+      {kr:'상사', mn:'дарга', ex:'상사가 엄격해요.', exTranslation:'Дарга хатуу шаардлагатай.'},
+      {kr:'출장', mn:'томилолт', ex:'출장을 가요.', exTranslation:'Томилолтоор явж байна.'},
+      {kr:'야근하다', mn:'илүү цагаар ажиллах', ex:'오늘 야근해요.', exTranslation:'Өнөөдөр илүү цагаар ажиллана.'},
+      {kr:'휴가', mn:'амралт', ex:'휴가를 가요.', exTranslation:'Амралтаараа явж байна.'},
+      {kr:'근무하다', mn:'ажиллах', ex:'회사에서 근무해요.', exTranslation:'Компанид ажилладаг.'},
+      {kr:'업무', mn:'ажил үүрэг', ex:'업무가 많아요.', exTranslation:'Ажил үүрэг их байна.'},
+      {kr:'조직', mn:'байгууллага', ex:'큰 조직이에요.', exTranslation:'Том байгууллага.'},
+      {kr:'부서', mn:'хэлтэс', ex:'다른 부서예요.', exTranslation:'Өөр хэлтэс.'},
+      {kr:'담당하다', mn:'хариуцах', ex:'제가 담당해요.', exTranslation:'Би хариуцдаг.'},
+    ]},
+    { topic:'Мэдээ, хэвлэл мэдээлэл', level:3, words:[
+      {kr:'뉴스', mn:'мэдээ', ex:'뉴스를 봐요.', exTranslation:'Мэдээ үзэж байна.'},
+      {kr:'신문', mn:'сонин', ex:'신문을 읽어요.', exTranslation:'Сонин уншиж байна.'},
+      {kr:'기사', mn:'нийтлэл', ex:'기사를 썼어요.', exTranslation:'Нийтлэл бичсэн.'},
+      {kr:'방송', mn:'нэвтрүүлэг', ex:'생방송이에요.', exTranslation:'Шууд нэвтрүүлэг.'},
+      {kr:'기자', mn:'сэтгүүлч', ex:'기자가 물어봐요.', exTranslation:'Сэтгүүлч асууж байна.'},
+      {kr:'발표하다', mn:'зарлах', ex:'결과를 발표해요.', exTranslation:'Үр дүнг зарлаж байна.'},
+      {kr:'보도하다', mn:'мэдээлэх', ex:'사고를 보도해요.', exTranslation:'Осол тухай мэдээлж байна.'},
+      {kr:'사건', mn:'явдал/хэрэг', ex:'큰 사건이에요.', exTranslation:'Том хэрэг явдал.'},
+      {kr:'사고', mn:'осол', ex:'교통사고가 났어요.', exTranslation:'Замын осол болсон.'},
+      {kr:'재난', mn:'гамшиг', ex:'자연재난이에요.', exTranslation:'Байгалийн гамшиг.'},
+      {kr:'위기', mn:'хямрал', ex:'경제 위기예요.', exTranslation:'Эдийн засгийн хямрал.'},
+      {kr:'여론', mn:'олон нийтийн санаа', ex:'여론이 나빠요.', exTranslation:'Олон нийтийн санаа муу байна.'},
+      {kr:'광고', mn:'сурталчилгаа', ex:'광고가 많아요.', exTranslation:'Сурталчилгаа их байна.'},
+      {kr:'매체', mn:'хэвлэл мэдээллийн хэрэгсэл', ex:'소셜 매체예요.', exTranslation:'Нийгмийн сүлжээ.'},
+      {kr:'정보', mn:'мэдээлэл', ex:'정보가 필요해요.', exTranslation:'Мэдээлэл хэрэгтэй.'},
+      {kr:'진실', mn:'үнэн', ex:'진실을 말해요.', exTranslation:'Үнэнийг хэлж байна.'},
+      {kr:'거짓', mn:'худал', ex:'거짓말이에요.', exTranslation:'Худал хэлж байна.'},
+      {kr:'논란', mn:'маргаан', ex:'논란이 되고 있어요.', exTranslation:'Маргаан болж байна.'},
+      {kr:'비판하다', mn:'шүүмжлэх', ex:'정부를 비판해요.', exTranslation:'Засгийн газрыг шүүмжилж байна.'},
+      {kr:'지지하다', mn:'дэмжих', ex:'그 의견을 지지해요.', exTranslation:'Тэр саналыг дэмжиж байна.'},
+    ]},
+    { topic:'Санаа бодол илэрхийлэх', level:3, words:[
+      {kr:'의견', mn:'санал бодол', ex:'제 의견은 달라요.', exTranslation:'Миний санаа өөр.'},
+      {kr:'생각하다', mn:'бодох', ex:'저는 이렇게 생각해요.', exTranslation:'Би ингэж бодож байна.'},
+      {kr:'이유', mn:'шалтгаан', ex:'이유가 뭐예요?', exTranslation:'Шалтгаан нь юу вэ?'},
+      {kr:'결과', mn:'үр дүн', ex:'결과가 좋아요.', exTranslation:'Үр дүн сайн.'},
+      {kr:'원인', mn:'учир шалтгаан', ex:'원인을 찾아요.', exTranslation:'Учир шалтгааныг олж байна.'},
+      {kr:'영향', mn:'нөлөө', ex:'영향을 받아요.', exTranslation:'Нөлөөлөгддөг.'},
+      {kr:'비교하다', mn:'харьцуулах', ex:'두 개를 비교해요.', exTranslation:'Хоёрыг харьцуулж байна.'},
+      {kr:'장점', mn:'давуу тал', ex:'장점이 많아요.', exTranslation:'Давуу тал их байна.'},
+      {kr:'단점', mn:'сул тал', ex:'단점도 있어요.', exTranslation:'Сул тал ч бий.'},
+      {kr:'필요하다', mn:'хэрэгтэй байх', ex:'도움이 필요해요.', exTranslation:'Тусламж хэрэгтэй байна.'},
+      {kr:'가능하다', mn:'боломжтой байх', ex:'그건 가능해요.', exTranslation:'Энэ боломжтой.'},
+      {kr:'불가능하다', mn:'боломжгүй байх', ex:'그건 불가능해요.', exTranslation:'Энэ боломжгүй.'},
+      {kr:'중요하다', mn:'чухал байх', ex:'건강이 중요해요.', exTranslation:'Эрүүл мэнд чухал.'},
+      {kr:'특별하다', mn:'онцгой байх', ex:'특별한 날이에요.', exTranslation:'Онцгой өдөр.'},
+      {kr:'관심', mn:'сонирхол', ex:'관심이 많아요.', exTranslation:'Сонирхол их байна.'},
+      {kr:'태도', mn:'хандлага', ex:'태도가 좋아요.', exTranslation:'Хандлага сайн.'},
+      {kr:'상황', mn:'нөхцөл байдал', ex:'상황이 어려워요.', exTranslation:'Нөхцөл байдал хэцүү.'},
+      {kr:'해결책', mn:'шийдэл', ex:'해결책을 찾아요.', exTranslation:'Шийдэл олж байна.'},
+      {kr:'발생하다', mn:'үүсэх', ex:'문제가 발생했어요.', exTranslation:'Асуудал үүслээ.'},
+      {kr:'반대하다', mn:'эсэргүүцэх', ex:'저는 반대해요.', exTranslation:'Би эсэргүүцэж байна.'},
+    ]},
+    { topic:'TOPIK II — хийсвэр ойлголт', level:4, words:[
+      {kr:'사회', mn:'нийгэм', ex:'사회가 변해요.', exTranslation:'Нийгэм өөрчлөгдөж байна.'},
+      {kr:'경제', mn:'эдийн засаг', ex:'경제가 어려워요.', exTranslation:'Эдийн засаг хэцүү байна.'},
+      {kr:'정치', mn:'улс төр', ex:'정치에 관심 없어요.', exTranslation:'Улс төрд сонирхолгүй.'},
+      {kr:'환경', mn:'орчин', ex:'환경을 보호해요.', exTranslation:'Орчноо хамгаалдаг.'},
+      {kr:'문화', mn:'соёл', ex:'문화가 달라요.', exTranslation:'Соёл өөр.'},
+      {kr:'전통', mn:'уламжлал', ex:'전통을 지켜요.', exTranslation:'Уламжлалаа хадгалдаг.'},
+      {kr:'발전', mn:'хөгжил', ex:'기술이 발전해요.', exTranslation:'Технологи хөгждөг.'},
+      {kr:'세계', mn:'дэлхий', ex:'세계 여행을 해요.', exTranslation:'Дэлхийгээр аялдаг.'},
+      {kr:'국제', mn:'олон улсын', ex:'국제 회의예요.', exTranslation:'Олон улсын хурал.'},
+      {kr:'정부', mn:'засгийн газар', ex:'정부가 발표했어요.', exTranslation:'Засгийн газар зарлалаа.'},
+      {kr:'법', mn:'хууль', ex:'법을 지켜요.', exTranslation:'Хуулиа сахидаг.'},
+      {kr:'권리', mn:'эрх', ex:'권리가 있어요.', exTranslation:'Эрхтэй.'},
+      {kr:'의무', mn:'үүрэг', ex:'의무를 다해요.', exTranslation:'Үүргээ биелүүлдэг.'},
+      {kr:'평등', mn:'тэгш байдал', ex:'평등이 중요해요.', exTranslation:'Тэгш байдал чухал.'},
+      {kr:'자유', mn:'эрх чөлөө', ex:'자유를 원해요.', exTranslation:'Эрх чөлөөг хүсдэг.'},
+      {kr:'통일', mn:'нэгдэл', ex:'통일을 원해요.', exTranslation:'Нэгдлийг хүсдэг.'},
+      {kr:'갈등', mn:'зөрчил', ex:'갈등이 생겼어요.', exTranslation:'Зөрчил үүслээ.'},
+      {kr:'협상', mn:'хэлэлцээр', ex:'협상을 해요.', exTranslation:'Хэлэлцээр хийж байна.'},
+      {kr:'지속가능하다', mn:'тогтвортой байх', ex:'지속가능한 발전.', exTranslation:'Тогтвортой хөгжил.'},
+      {kr:'인류', mn:'хүн төрөлхтөн', ex:'인류를 위해요.', exTranslation:'Хүн төрөлхтний төлөө.'},
+    ]},
+  ];
+
   const defaultData = {
     vocab: [],
     streakLog: [],
@@ -473,7 +1119,12 @@
     startDate: '',
     appsScriptUrl: '',
     sessionSize: 20,
-    lessonNotes: []
+    lessonNotes: [],
+    dailyNewWordGoal: 15,
+    dailyReviewGoal: 24,
+    randomOrder: false,
+    dailyCounts: {},
+    writingEntries: {}
   };
 
   let data = null;
@@ -488,6 +1139,27 @@
   }
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Hangul romanization (Revised Romanization, simplified) ----------
+  const RR_CHO = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
+  const RR_JUNG = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
+  const RR_JONG = ['','k','k','k','n','n','n','t','l','k','m','l','l','l','p','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
+  function romanize(text){
+    if(!text) return '';
+    let out = '';
+    for(const ch of text){
+      const code = ch.charCodeAt(0) - 0xAC00;
+      if(code >= 0 && code < 11172){
+        const cho = Math.floor(code / 588);
+        const jung = Math.floor((code % 588) / 28);
+        const jong = code % 28;
+        out += RR_CHO[cho] + RR_JUNG[jung] + RR_JONG[jong];
+      } else {
+        out += ch;
+      }
+    }
+    return out;
   }
 
   // ---------- Local cache (window.storage) ----------
@@ -563,7 +1235,7 @@
     const cached = await loadLocal();
     data = cached ? Object.assign(JSON.parse(JSON.stringify(defaultData)), cached) : JSON.parse(JSON.stringify(defaultData));
     if(!data.vocab) data.vocab = [];
-    if(!data.vocab.length){
+    if(!data.vocab.length && !data.appsScriptUrl){
       const today = todayStr();
       data.vocab = [
         {id:'demo-1', kr:'안녕하세요', mn:'Сайн байна уу', ex:'안녕하세요, 만나서 반가워요.', exTranslation:'Сайн байна уу, танилцсандаа баяртай байна.', level:0, nextReview:today, created:today, category:'general'},
@@ -576,14 +1248,22 @@
     if(!data.dailyTasks) data.dailyTasks = {};
     if(!data.schedule) data.schedule = defaultData.schedule;
     if(!data.lessonNotes) data.lessonNotes = [];
+    if(!data.dailyCounts) data.dailyCounts = {};
+    if(!data.writingEntries) data.writingEntries = {};
+    if(!data.dailyNewWordGoal) data.dailyNewWordGoal = 15;
+    if(!data.dailyReviewGoal) data.dailyReviewGoal = 24;
+    if(data.randomOrder === undefined) data.randomOrder = false;
     if(!data.topikGoal) data.topikGoal = 'I';
 
     document.getElementById('appsScriptUrl').value = data.appsScriptUrl || '';
     document.getElementById('startDate').value = data.startDate || '';
     document.getElementById('sessionSizeInput').value = data.sessionSize || 20;
+    document.getElementById('newWordGoalInput').value = data.dailyNewWordGoal || 15;
+    document.getElementById('reviewGoalInput').value = data.dailyReviewGoal || 24;
 
     render();
     refreshVocabTab();
+    renderWordBankTopics();
     if(data.appsScriptUrl) syncFromSheets();
     else setSyncStatus('', 'Тохируулаагүй — локал горимд ажиллаж байна');
   }
@@ -605,6 +1285,20 @@
     saveLocal();
     refreshVocabTab();
   });
+  document.getElementById('newWordGoalInput').addEventListener('change', (e)=>{
+    const n = parseInt(e.target.value, 10);
+    data.dailyNewWordGoal = (n && n > 0) ? n : 15;
+    e.target.value = data.dailyNewWordGoal;
+    saveLocal();
+    renderTaskList();
+  });
+  document.getElementById('reviewGoalInput').addEventListener('change', (e)=>{
+    const n = parseInt(e.target.value, 10);
+    data.dailyReviewGoal = (n && n > 0) ? n : 24;
+    e.target.value = data.dailyReviewGoal;
+    saveLocal();
+    renderTaskList();
+  });
 
   // ---------- Tabs ----------
   document.querySelectorAll('.tab-btn').forEach(btn=>{
@@ -623,22 +1317,47 @@
     if(!data.dailyTasks[t]) data.dailyTasks[t] = {};
     return data.dailyTasks[t];
   }
+  function bumpDailyCount(key){
+    const t = todayStr();
+    if(!data.dailyCounts[t]) data.dailyCounts[t] = {};
+    data.dailyCounts[t][key] = (data.dailyCounts[t][key]||0) + 1;
+  }
+  function getTodayCounts(){
+    const t = todayStr();
+    return data.dailyCounts[t] || {newWords:0, reviews:0};
+  }
   function isDayComplete(tasksObj){
     return DAILY_TASKS_DEF.every(td => tasksObj[td.key]);
   }
   function renderTaskList(){
     const t = todayStr();
     const tasks = getTodayTasks();
+    const counts = getTodayCounts();
+    const newWordsGoal = data.dailyNewWordGoal || 15;
+    const reviewGoal = data.dailyReviewGoal || 24;
     const list = document.getElementById('taskList');
-    list.innerHTML = DAILY_TASKS_DEF.map(td=>{
+    const progressHtml = `
+      <div class="auto-progress">
+        <div class="auto-progress-row">
+          <span>Шинэ үг</span><span>${counts.newWords||0} / ${newWordsGoal}</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, Math.round(((counts.newWords||0)/newWordsGoal)*100))}%;"></div></div>
+      </div>
+      <div class="auto-progress">
+        <div class="auto-progress-row">
+          <span>Давталт</span><span>${counts.reviews||0} / ${reviewGoal}</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, Math.round(((counts.reviews||0)/reviewGoal)*100))}%;"></div></div>
+      </div>`;
+    const taskRows = DAILY_TASKS_DEF.map(td=>{
       const done = !!tasks[td.key];
       return `<div class="task-row ${done?'done':''}">
         <input type="checkbox" data-key="${td.key}" ${done?'checked':''}>
-        <div class="task-icon">${td.icon}</div>
         <div class="task-label">${td.label}</div>
         <div class="task-min">${td.minutes} мин</div>
       </div>`;
     }).join('');
+    list.innerHTML = progressHtml + taskRows;
     list.querySelectorAll('input[type=checkbox]').forEach(chk=>{
       chk.addEventListener('change', ()=>{
         const tasks = getTodayTasks();
@@ -689,6 +1408,31 @@
     });
   }
 
+  // Generic AI call: prefers the user's own Apps Script + API key proxy
+  // (works everywhere), falls back to the claude.ai in-artifact call
+  // (works only while this page is open inside claude.ai).
+  async function callAI(prompt, maxTokens){
+    if(data.appsScriptUrl){
+      const res = await apiPost({action:'ai', prompt, maxTokens: maxTokens||800});
+      if(res && res.success && res.text) return res.text;
+      if(res && res.error) throw new Error(res.error);
+      throw new Error('AI proxy тохируулаагүй эсвэл алдаатай байна');
+    }
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens: maxTokens||800,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+    const json = await res.json();
+    const text = (json.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').trim();
+    if(!text) throw new Error('Хариу ирсэнгүй');
+    return text;
+  }
+
   async function getNoteFeedback(noteId){
     const note = data.lessonNotes.find(n=>n.id===noteId);
     if(!note) return;
@@ -700,20 +1444,9 @@
         + '2) Хэрэв тэмдэглэлд Солонгос үг/өгүүлбэр байвал зөв эсэхийг шалгаад, алдаа байвал зассан хувилбарыг тайлбарын хамт өг.\n'
         + '3) Дараа нь юу дадлагажуулбал зохимжтойг нэг богино зөвлөгөөгөөр өг.\n'
         + 'Монгол хэлээр, товчоор бич.\n\nТэмдэглэл:\n' + note.text;
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model:'claude-sonnet-4-6',
-          max_tokens:1000,
-          messages:[{role:'user', content:prompt}]
-        })
-      });
-      const json = await res.json();
-      const textBlocks = (json.content||[]).filter(b=>b.type==='text').map(b=>b.text);
-      note.feedback = textBlocks.join('\n').trim() || 'Хариу авч чадсангүй, дахин оролдоно уу.';
+      note.feedback = (await callAI(prompt, 1000)).trim() || 'Хариу авч чадсангүй, дахин оролдоно уу.';
     } catch(e){
-      note.feedback = 'Алдаа гарлаа — интернэт холболтоо шалгаад дахин оролдоно уу.';
+      note.feedback = 'Алдаа гарлаа: ' + e.message;
     }
     saveLocal();
     renderLessonNotes();
@@ -751,22 +1484,99 @@
   async function generateExample(kr, mn){
     const prompt = 'Чи Солонгос хэлний багш. "' + kr + '" (утга: ' + mn + ') гэдэг үгийг ашигласан, анхан шатны сурагчид тохирох 1 энгийн жишээ өгүүлбэр Солонгосоор зохиогоод, монгол орчуулгыг нь өг. Зөвхөн дараах JSON форматаар хариул, өөр юу ч бичихгүй: {"sentence":"...","translation":"..."}';
     try{
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          model:'claude-sonnet-4-6',
-          max_tokens:300,
-          messages:[{role:'user', content:prompt}]
-        })
-      });
-      const json = await res.json();
-      const text = (json.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('').replace(/```json|```/g,'').trim();
+      const text = (await callAI(prompt, 300)).replace(/```json|```/g,'').trim();
       const parsed = JSON.parse(text);
       if(parsed && parsed.sentence) return {sentence:parsed.sentence, translation:parsed.translation||''};
     } catch(e){ /* fall through */ }
     return null;
   }
+
+  // ---------- AI word suggestions ----------
+  let lastSuggestions = [];
+  let lastSuggestTopic = '';
+
+  function isGroupFullyAdded(group){
+    return group.words.every(w=>data.vocab.some(v=>v.category==='general' && v.kr===w.kr));
+  }
+  function renderWordBankTopics(){
+    const box = document.getElementById('wordBankTopics');
+    const levels = [1,2,3,4];
+    const levelLabels = {1:'Түвшин 1 — Анхан шат', 2:'Түвшин 2 — Дунд шат', 3:'Түвшин 3 — Дунд-ахисан', 4:'Түвшин 4 — TOPIK II'};
+    box.innerHTML = levels.map(lv=>{
+      const groups = WORD_BANK.map((g,i)=>({...g,i})).filter(g=>(g.level||1)===lv && !isGroupFullyAdded(g));
+      if(!groups.length) return '';
+      return `<div class="small muted" style="width:100%; margin-top:8px; margin-bottom:2px;">${levelLabels[lv]}</div>`
+        + groups.map(g=>`<button data-bi="${g.i}">${escapeHtml(g.topic)}</button>`).join('');
+    }).join('');
+    if(!box.innerHTML.trim()){
+      box.innerHTML = '<div class="empty">Бүх бэлэн бүлгийн үгийг нэмчихлээ 🎉</div>';
+    }
+    box.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const group = WORD_BANK[parseInt(btn.dataset.bi,10)];
+        lastSuggestions = group.words.filter(w=>!data.vocab.some(v=>v.category==='general' && v.kr===w.kr));
+        lastSuggestTopic = group.topic + (lastSuggestions.length < group.words.length ? ' (зарим нь аль хэдийн байгаа тул алгассан)' : '');
+        renderSuggestList();
+      });
+    });
+  }
+
+  function renderSuggestList(){
+    const box = document.getElementById('suggestList');
+    const resultCard = document.getElementById('suggestResultCard');
+    if(!lastSuggestions.length){ box.innerHTML = ''; resultCard.style.display = 'none'; return; }
+    resultCard.style.display = 'block';
+    const topicHtml = lastSuggestTopic ? `<div class="small muted" style="margin-bottom:8px;">Сэдэв: ${escapeHtml(lastSuggestTopic)}</div>` : '';
+    box.innerHTML = topicHtml + lastSuggestions.map((s,i)=>`
+      <div class="suggest-row">
+        <input type="checkbox" data-i="${i}" checked>
+        <div>
+          <div class="word-kr">${escapeHtml(s.kr||'')}</div>
+          <div class="romanization">${escapeHtml(romanize(s.kr||''))}</div>
+          <div class="word-mn">${escapeHtml(s.mn||'')}</div>
+          ${s.ex ? `<div class="suggest-ex">${escapeHtml(s.ex)}</div>` : ''}
+        </div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('addSuggestedBtn').addEventListener('click', async ()=>{
+    const checked = [...document.querySelectorAll('#suggestList input[type=checkbox]:checked')].map(c=>parseInt(c.dataset.i,10));
+    const today = todayStr();
+    let addedCount = 0;
+    for(const i of checked){
+      const s = lastSuggestions[i];
+      if(!s || !s.kr || !s.mn) continue;
+      if(data.vocab.some(w=>w.category==='general' && w.kr===s.kr)) continue;
+      const localId = 'local-'+Date.now()+Math.random().toString(36).slice(2,6)+'-'+i;
+      const word = {id: localId, kr:s.kr, mn:s.mn, ex:s.ex||'', exTranslation:s.exTranslation||'', level:0, nextReview:today, created:today, category:'general', autoEx:false};
+      data.vocab.push(word);
+      addedCount++;
+      apiPost({action:'add', kr:s.kr, mn:s.mn, ex:s.ex||'', exTranslation:s.exTranslation||'', category:'general'}).then(res=>{
+        if(res && res.success){ word.id = String(res.id); word.created = res.created || today; saveLocal(); }
+      });
+    }
+    lastSuggestions = [];
+    document.getElementById('suggestList').innerHTML = addedCount ? `<div class="muted small">${addedCount} үг нэмэгдлээ.</div>` : '';
+    document.getElementById('addSuggestedBtn').style.display = 'none';
+    saveLocal();
+    refreshVocabTab();
+    renderWordBankTopics();
+    render();
+  });
+
+  function renderWeeklyGoal(){
+    let sum = 0;
+    const d = new Date();
+    for(let i=0;i<7;i++){
+      const ds = todayStr(d);
+      sum += (data.dailyCounts[ds] && data.dailyCounts[ds].newWords) || 0;
+      d.setDate(d.getDate()-1);
+    }
+    const goal = 100;
+    document.getElementById('weeklyGoalText').textContent = `Энэ 7 хоногт нэмсэн шинэ үг: ${sum} / ${goal}`;
+    document.getElementById('weeklyGoalBar').style.width = Math.min(100, Math.round((sum/goal)*100)) + '%';
+  }
+
 
   async function addWord(){
     const kr = document.getElementById('inKr').value.trim();
@@ -774,6 +1584,11 @@
     let ex = document.getElementById('inEx').value.trim();
     let exTranslation = document.getElementById('inExTr').value.trim();
     if(!kr || !mn) return;
+
+    const dup = data.vocab.find(v=>v.category==='general' && v.kr===kr);
+    if(dup){
+      if(!confirm(`"${kr}" гэдэг үг аль хэдийн байна (утга: ${dup.mn}). Дахин нэмэх үү?`)) return;
+    }
 
     const addBtn = document.getElementById('addWordBtn');
     let autoGenerated = false;
@@ -802,25 +1617,75 @@
       word.created = res.created || today;
       saveLocal(); refreshVocabTab();
     }
+    showAddedConfirmation(kr, mn);
   }
   document.getElementById('addWordBtn').addEventListener('click', addWord);
+
+  function showAddedConfirmation(kr, mn){
+    const today = todayStr();
+    const countToday = data.vocab.filter(w=>w.category==='general' && w.created===today).length;
+    const el = document.getElementById('addWordConfirm');
+    el.textContent = `✓ "${kr}" (${mn}) нэмэгдлээ · Өнөөдөр нэмсэн: ${countToday}`;
+    el.style.display = 'block';
+  }
 
   function dueWords(cat){
     const t = todayStr();
     return data.vocab.filter(w => (cat ? w.category===cat : w.category==='general') && w.nextReview <= t);
   }
 
+  function getStatus(w){
+    if(w.level===0) return 'new';
+    if(w.level<=2) return 'learning';
+    if(w.level<=5) return 'familiar';
+    return 'mastered';
+  }
+  const STATUS_LABELS = {new:'Шинэ', learning:'Суралцаж буй', familiar:'Танил', mastered:'Эзэмшсэн'};
+
   function refreshVocabTab(){
     renderVocabStats();
+    renderWeeklyGoal();
+    document.getElementById('randomOrderChk').checked = !!data.randomOrder;
     const due = dueWords('general');
     const cap = data.sessionSize || 20;
     document.getElementById('dueSummaryText').textContent = due.length
       ? due.length + ' үг өнөөдөр давтах хугацаатай' + (due.length > cap ? ` — session бүрт ${cap}-аар хийнэ.` : '.')
       : 'Өнөөдөр давтах үг алга — шинэ үг нэмж болно.';
     document.getElementById('startReviewBtn').disabled = !due.length;
-    reviewQueue = [...due].sort((a,b)=> a.nextReview.localeCompare(b.nextReview)).slice(0, cap);
+    let queue = [...due].sort((a,b)=> a.nextReview.localeCompare(b.nextReview));
+    if(data.randomOrder) queue = shuffleArray(queue);
+    reviewQueue = queue.slice(0, cap);
+
+    const weak = data.vocab.filter(w=>w.category==='general' && (w.forgotStreak||0)>=3);
+    document.getElementById('weakCount').textContent = weak.length;
+    document.getElementById('weakWordsCard').style.display = weak.length ? 'block' : 'none';
+
     renderWordList();
   }
+
+  function shuffleArray(arr){
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  document.getElementById('randomOrderChk').addEventListener('change', (e)=>{
+    data.randomOrder = e.target.checked;
+    saveLocal();
+    refreshVocabTab();
+  });
+  document.getElementById('startWeakReviewBtn').addEventListener('click', ()=>{
+    const weak = data.vocab.filter(w=>w.category==='general' && (w.forgotStreak||0)>=3);
+    if(!weak.length) return;
+    reviewQueue = data.randomOrder ? shuffleArray(weak) : weak;
+    document.getElementById('reviewOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('dueCount').textContent = reviewQueue.length;
+    nextCard();
+  });
 
   function openReview(){
     if(!reviewQueue.length) return;
@@ -839,16 +1704,27 @@
 
   function renderVocabStats(){
     const gw = data.vocab.filter(w=>w.category==='general');
-    const t = todayStr();
-    const total = gw.length;
-    const due = gw.filter(w=>w.nextReview<=t).length;
-    const fresh = gw.filter(w=>w.level===0).length;
-    const mastered = gw.filter(w=>w.level>=INTERVALS.length-1).length;
+    const counts = {new:0, learning:0, familiar:0, mastered:0};
+    gw.forEach(w=>counts[getStatus(w)]++);
     document.getElementById('vocabStats').innerHTML = `
-      <div class="stat-mini"><div class="n">${total}</div><div class="l">Нийт</div></div>
+      <div class="stat-mini"><div class="n">${gw.length}</div><div class="l">Нийт</div></div>
+      <div class="stat-mini"><div class="n">${counts.new}</div><div class="l">Шинэ</div></div>
+      <div class="stat-mini"><div class="n">${counts.learning}</div><div class="l">Суралцаж буй</div></div>
+      <div class="stat-mini"><div class="n">${counts.familiar}</div><div class="l">Танил</div></div>`;
+    renderExtraStats();
+  }
+  function renderExtraStats(){
+    const el = document.getElementById('extraStats');
+    if(!el) return;
+    const gw = data.vocab.filter(w=>w.category==='general');
+    const t = todayStr();
+    const due = gw.filter(w=>w.nextReview<=t).length;
+    const mastered = gw.filter(w=>getStatus(w)==='mastered').length;
+    const weak = gw.filter(w=>(w.forgotStreak||0)>=3).length;
+    el.innerHTML = `
       <div class="stat-mini"><div class="n">${due}</div><div class="l">Өнөөдөр давтах</div></div>
-      <div class="stat-mini"><div class="n">${fresh}</div><div class="l">Шинэ</div></div>
-      <div class="stat-mini"><div class="n">${mastered}</div><div class="l">Эзэмшсэн</div></div>`;
+      <div class="stat-mini"><div class="n">${mastered}</div><div class="l">Эзэмшсэн</div></div>
+      <div class="stat-mini"><div class="n">${weak}</div><div class="l">Сул</div></div>`;
   }
 
   document.querySelectorAll('#vocabFilters button').forEach(btn=>{
@@ -859,6 +1735,8 @@
       renderWordList();
     });
   });
+  document.getElementById('vocabSearch').addEventListener('input', renderWordList);
+  document.getElementById('vocabSort').addEventListener('change', renderWordList);
 
   let currentMode = 'recog';
   const MODE_LABELS = {recog:'Таних', prod:'Гаргах', cloze:'Нөхөх'};
@@ -887,7 +1765,6 @@
       document.getElementById('flashExTr').style.display='none';
       document.getElementById('flashHint').textContent = 'Өнөөдрийн бүх үгээ давтлаа!';
       document.getElementById('flashHint').style.display='block';
-      document.getElementById('flashActions').style.display='none';
       currentCard = null;
       return;
     }
@@ -897,13 +1774,17 @@
     document.getElementById('modePill').style.display = 'block';
 
     const frontEl = document.getElementById('flashKr');
+    const romanEl = document.getElementById('flashRoman');
     const speakerBtn = document.getElementById('speakerBtn');
     document.getElementById('flashMn').style.display = 'none';
     document.getElementById('flashEx').style.display = 'none';
     document.getElementById('flashExTr').style.display = 'none';
+    romanEl.style.display = 'none';
 
     if(currentMode === 'recog'){
       frontEl.textContent = currentCard.kr;
+      romanEl.textContent = romanize(currentCard.kr);
+      romanEl.style.display = 'block';
       speakerBtn.style.display = 'inline-flex';
       speakerBtn.dataset.speak = currentCard.kr;
       document.getElementById('flashMn').textContent = currentCard.mn;
@@ -927,14 +1808,15 @@
 
     document.getElementById('flashHint').textContent = '';
     document.getElementById('flashHint').style.display = 'none';
-    document.getElementById('flashActions').style.display = 'none';
   }
   function revealCard(){
     document.getElementById('flashMn').style.display='block';
     if(document.getElementById('flashEx').textContent) document.getElementById('flashEx').style.display='block';
     if(document.getElementById('flashExTr').textContent) document.getElementById('flashExTr').style.display='block';
     document.getElementById('flashHint').style.display='none';
-    document.getElementById('flashActions').style.display='flex';
+    if(currentMode === 'prod' && currentCard){
+      document.getElementById('flashMn').textContent = currentCard.kr + '  (' + romanize(currentCard.kr) + ')';
+    }
     if(currentMode !== 'recog' && currentCard){
       const speakerBtn = document.getElementById('speakerBtn');
       speakerBtn.style.display = 'inline-flex';
@@ -1022,12 +1904,17 @@
     if(!currentCard) return;
     const w = data.vocab.find(v=>v.id===currentCard.id);
     if(w){
+      if(knew && w.level===0 && !w.countedTowardGoal){
+        bumpDailyCount('newWords');
+        w.countedTowardGoal = true;
+      }
       if(knew){ w.forgotStreak = 0; } else { w.forgotStreak = (w.forgotStreak||0) + 1; }
       w.level = knew ? Math.min(w.level+1, INTERVALS.length-1) : Math.max(w.level-1, 0);
       const d = new Date(); d.setDate(d.getDate()+INTERVALS[w.level]);
       w.nextReview = todayStr(d);
       apiPost({action:'update', id:w.id, level:w.level, nextReview:w.nextReview});
     }
+    bumpDailyCount('reviews');
     reviewQueue.shift();
     if(!knew && w) reviewQueue.push(w);
     saveLocal();
@@ -1035,36 +1922,45 @@
     document.getElementById('dueCount').textContent = reviewQueue.length;
     renderVocabStats();
     renderWordList();
+    renderTaskList();
   }
-  document.getElementById('btnKnew').addEventListener('click', ()=>gradeCard(true));
-  document.getElementById('btnForgot').addEventListener('click', ()=>gradeCard(false));
 
   function renderWordList(){
     const gw = data.vocab.filter(w=>w.category==='general');
     document.getElementById('wordTotal').textContent = gw.length;
     const t = todayStr();
     let filtered = gw;
-    if(vocabFilter==='new') filtered = gw.filter(w=>w.level===0);
-    if(vocabFilter==='review') filtered = gw.filter(w=>w.nextReview<=t);
-    if(vocabFilter==='mastered') filtered = gw.filter(w=>w.level>=INTERVALS.length-1);
-    if(vocabFilter==='leech') filtered = gw.filter(w=>(w.forgotStreak||0)>=3);
+    if(vocabFilter!=='all' && vocabFilter!=='due' && vocabFilter!=='leech'){
+      filtered = filtered.filter(w=>getStatus(w)===vocabFilter);
+    }
+    if(vocabFilter==='due') filtered = filtered.filter(w=>w.nextReview<=t);
+    if(vocabFilter==='leech') filtered = filtered.filter(w=>(w.forgotStreak||0)>=3);
+
+    const q = document.getElementById('vocabSearch').value.trim().toLowerCase();
+    if(q) filtered = filtered.filter(w=> w.kr.toLowerCase().includes(q) || w.mn.toLowerCase().includes(q));
+
+    const sortMode = document.getElementById('vocabSort').value;
+    filtered = [...filtered];
+    if(sortMode==='newest') filtered.sort((a,b)=> (b.created||'').localeCompare(a.created||''));
+    if(sortMode==='oldest') filtered.sort((a,b)=> (a.created||'').localeCompare(b.created||''));
+    if(sortMode==='level') filtered.sort((a,b)=> b.level - a.level);
 
     const list = document.getElementById('wordList');
     if(!filtered.length){
       list.innerHTML = '<div class="empty">Энэ ангилалд үг алга.</div>';
       return;
     }
-    list.innerHTML = [...filtered].reverse().map(w=>{
-      const mastered = w.level >= INTERVALS.length-1;
-      const isNew = w.level===0;
+    list.innerHTML = filtered.map(w=>{
       const due = w.nextReview <= t;
       const isLeech = (w.forgotStreak||0) >= 3;
-      let pillClass = isLeech ? 'leech' : (due ? '' : (mastered?'mastered':'new'));
-      let pillText = isLeech ? 'Хүнд' : (mastered ? 'Эзэмшсэн' : (due ? 'Давтах' : (isNew?'Шинэ':w.nextReview)));
-      return `<div class="word-row">
-        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
-        <div style="display:flex; align-items:center; gap:8px;">
+      const status = getStatus(w);
+      let pillClass = isLeech ? 'leech' : (status==='mastered' ? 'mastered' : (status==='new' ? 'new' : ''));
+      let pillText = isLeech ? 'Сул' : (due ? 'Давтах' : STATUS_LABELS[status]);
+      return `<div class="word-row" data-id="${w.id}">
+        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="romanization">${escapeHtml(romanize(w.kr))}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
+        <div style="display:flex; align-items:center; gap:6px;">
           <div class="pill ${pillClass}">${pillText}</div>
+          <button class="edit-btn" data-id="${w.id}" title="Засах">✎</button>
           <button class="del-btn" data-id="${w.id}" title="Устгах">×</button>
         </div>
       </div>`;
@@ -1072,6 +1968,23 @@
     list.querySelectorAll('.del-btn').forEach(btn=>{
       btn.addEventListener('click', ()=>deleteWord(btn.dataset.id));
     });
+    list.querySelectorAll('.edit-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>editWord(btn.dataset.id));
+    });
+  }
+
+  function editWord(id){
+    const w = data.vocab.find(v=>v.id===id);
+    if(!w) return;
+    const newMn = prompt('Монгол утга:', w.mn);
+    if(newMn===null) return;
+    const newEx = prompt('Жишээ өгүүлбэр:', w.ex||'');
+    if(newEx===null) return;
+    w.mn = newMn.trim() || w.mn;
+    w.ex = newEx.trim();
+    saveLocal();
+    renderWordList();
+    apiPost({action:'update', id:w.id, level:w.level, nextReview:w.nextReview, mn:w.mn, ex:w.ex});
   }
 
   async function deleteWord(id){
@@ -1191,7 +2104,7 @@
     }
     box.innerHTML = words.map(w=>`
       <div class="word-row">
-        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
+        <div><div class="word-kr">${escapeHtml(w.kr)}</div><div class="romanization">${escapeHtml(romanize(w.kr))}</div><div class="word-mn">${escapeHtml(w.mn)}</div></div>
         <button class="del-btn" data-id="${w.id}" title="Устгах">×</button>
       </div>
     `).join('');
@@ -1212,6 +2125,95 @@
     saveLocal(); renderKoreaWordList();
     const res = await apiPost({action:'add', kr, mn, ex:'', exTranslation:'', category:activeKoreaCat});
     if(res && res.success){ word.id = String(res.id); saveLocal(); }
+  });
+
+  // ---------- Listening training ----------
+  let listeningWord = null;
+  function pickListeningWord(){
+    const pool = data.vocab.filter(w=>w.category==='general' && w.ex);
+    if(!pool.length){ listeningWord = null; return; }
+    listeningWord = pool[Math.floor(Math.random()*pool.length)];
+  }
+  function renderListening(){
+    pickListeningWord();
+    document.getElementById('listeningTranslation').style.display = 'none';
+    if(!listeningWord){
+      document.getElementById('listeningSentence').textContent = 'Жишээ өгүүлбэртэй үг алга байна. Эхлээд Үгийн сан-даа жишээ өгүүлбэртэй үг нэмнэ үү.';
+      document.getElementById('listeningTranslation').textContent = '';
+      return;
+    }
+    document.getElementById('listeningSentence').textContent = '?';
+    document.getElementById('listeningTranslation').textContent = listeningWord.exTranslation || '';
+  }
+  document.getElementById('listenPlayBtn').addEventListener('click', ()=>{
+    if(!listeningWord || !('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(listeningWord.ex);
+    u.lang = 'ko-KR';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  });
+  document.getElementById('listenRevealBtn').addEventListener('click', ()=>{
+    if(!listeningWord) return;
+    document.getElementById('listeningSentence').textContent = listeningWord.ex;
+    document.getElementById('listeningTranslation').style.display = 'block';
+  });
+  document.getElementById('listenNextBtn').addEventListener('click', renderListening);
+
+  // ---------- Daily writing prompt ----------
+  const WRITING_PROMPTS = [
+    '오늘 뭐 했어요?',
+    '주말에 보통 뭐 해요?',
+    '가장 좋아하는 음식이 뭐예요? 왜요?',
+    '오늘 날씨가 어때요?',
+    '어제 몇 시에 잤어요?',
+    '취미가 뭐예요?',
+    '한국에 가면 어디에 가고 싶어요?',
+    '오늘 아침에 뭐 먹었어요?',
+    '가족에 대해 이야기해 주세요.',
+    '지금 기분이 어때요? 왜요?'
+  ];
+  function dayOfYear(){
+    const now = new Date();
+    const start = new Date(now.getFullYear(),0,0);
+    return Math.floor((now-start)/86400000);
+  }
+  function renderWritingPrompt(){
+    const prompt = WRITING_PROMPTS[dayOfYear() % WRITING_PROMPTS.length];
+    document.getElementById('writingPrompt').textContent = prompt;
+    const t = todayStr();
+    const entry = data.writingEntries[t];
+    document.getElementById('writingInput').value = entry ? entry.text : '';
+    const fb = document.getElementById('writingFeedback');
+    if(entry && entry.feedback){ fb.style.display='block'; fb.textContent = entry.feedback; }
+    else { fb.style.display='none'; fb.textContent=''; }
+  }
+  document.getElementById('writingCheckBtn').addEventListener('click', async ()=>{
+    const text = document.getElementById('writingInput').value.trim();
+    if(!text) return;
+    const t = todayStr();
+    const promptText = document.getElementById('writingPrompt').textContent;
+    const btn = document.getElementById('writingCheckBtn');
+    btn.disabled = true; btn.textContent = 'Шалгаж байна…';
+    const fb = document.getElementById('writingFeedback');
+    try{
+      const aiPrompt = 'Чи Солонгос хэлний багш. Асуулт: "' + promptText + '"\nСурагчийн бичсэн хариулт:\n' + text
+        + '\n\nЭнэ хариултыг шалгаад: 1) Дүрмийн алдаа байвал заа, засвар санал болго. 2) Зөв бичигдсэн хэсгийг тэмдэглэ. 3) Илүү байгалиар хэрхэн хэлж болохыг санал болго. Монгол хэлээр, товч тодорхой бич.';
+      const feedback = await callAI(aiPrompt, 800);
+      data.writingEntries[t] = {text, feedback};
+      fb.style.display = 'block';
+      fb.textContent = feedback;
+    } catch(e){
+      fb.style.display = 'block';
+      fb.textContent = 'Алдаа гарлаа: ' + e.message;
+    }
+    btn.disabled = false; btn.textContent = 'Шалгуулах';
+    saveLocal();
+  });
+  document.getElementById('writingInput').addEventListener('change', (e)=>{
+    const t = todayStr();
+    if(!data.writingEntries[t]) data.writingEntries[t] = {text:'', feedback:''};
+    data.writingEntries[t].text = e.target.value;
+    saveLocal();
   });
 
   // ---------- Progress ----------
@@ -1245,25 +2247,59 @@
       <div class="stat-box"><div class="n">${overallPct}%</div><div class="l">Ерөнхий явц</div></div>
     `;
 
-    const grid = document.getElementById('heatGrid');
+    renderCalendar();
+  }
+
+  const MONTH_NAMES_MN = ['1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар','7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
+  let calendarOffset = 0; // 0 = current month, -1 = previous month, etc.
+  function renderCalendar(){
+    const now = new Date();
+    const viewDate = new Date(now.getFullYear(), now.getMonth()+calendarOffset, 1);
+    const year = viewDate.getFullYear();
+    const month = viewDate.getMonth();
+    document.getElementById('calMonthLabel').textContent = MONTH_NAMES_MN[month] + ' ' + year;
+    document.getElementById('calNextBtn').disabled = calendarOffset>=0;
+    document.getElementById('calNextBtn').style.opacity = calendarOffset>=0 ? 0.35 : 1;
+
     const set = new Set(data.streakLog);
     const noteSet = new Set(data.lessonNotes.map(n=>n.date));
+    const firstDayOfWeek = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const todayDs = todayStr();
+
     const cells = [];
-    const start = new Date(); start.setDate(start.getDate()-69);
-    for(let i=0;i<70;i++){
-      const d = new Date(start); d.setDate(start.getDate()+i);
+    for(let i=0;i<firstDayOfWeek;i++){
+      cells.push(`<div class="cell empty"></div>`);
+    }
+    for(let day=1; day<=daysInMonth; day++){
+      const d = new Date(year, month, day);
       const ds = todayStr(d);
       let cls = '';
-      if(set.has(ds)) cls = 'on';
+      if(ds > todayDs) cls = 'future';
+      else if(set.has(ds)) cls = 'on';
       else if(noteSet.has(ds)) cls = 'noted';
-      cells.push(`<div class="cell ${cls}" title="${ds}"></div>`);
+      cells.push(`<div class="cell ${cls}" title="${ds}"><span class="daynum">${day}</span></div>`);
     }
-    grid.innerHTML = cells.join('');
+    document.getElementById('heatGrid').innerHTML = cells.join('');
   }
+  document.getElementById('calPrevBtn').addEventListener('click', ()=>{
+    calendarOffset--;
+    renderCalendar();
+  });
+  document.getElementById('calNextBtn').addEventListener('click', ()=>{
+    if(calendarOffset>=0) return;
+    calendarOffset++;
+    renderCalendar();
+  });
 
   // ---------- Header / today date ----------
   function renderHeader(){
-    document.getElementById('streakNum').textContent = computeStreak().streak;
+    const streak = computeStreak().streak;
+    document.getElementById('streakNum').textContent = streak;
+    const milestones = [100,30,7];
+    const hit = milestones.find(m=>streak>=m);
+    const labEl = document.querySelector('.streak-badge .lab');
+    labEl.textContent = hit ? hit + '+ хоногийн дараалал' : 'өдрийн дараалал';
     const now = new Date();
     document.getElementById('todayDate').textContent = now.toLocaleDateString('mn-MN', {month:'long', day:'numeric', weekday:'long'});
   }
@@ -1272,11 +2308,15 @@
     renderHeader();
     renderTaskList();
     renderLessonNotes();
+    renderListening();
+    renderWritingPrompt();
     renderSchedule();
     renderRoadmap();
     renderProgress();
     renderVocabStats();
+    renderWeeklyGoal();
     renderWordList();
+    renderWordBankTopics();
   }
 
   init();
